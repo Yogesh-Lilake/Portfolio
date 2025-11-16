@@ -14,6 +14,8 @@ logs/
 # # ==========================
 vendor/
 node_modules/
+cache/
+*.json
 *.cache
 *.tmp
 
