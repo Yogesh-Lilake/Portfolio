@@ -14,49 +14,70 @@ $host = $_SERVER['HTTP_HOST'];
 // ---------------------------------------------------------
 // ROOT DIRECTORY (Absolute server path)
 // ---------------------------------------------------------
-$root = str_replace('\\', '/', realpath(__DIR__ . '/../')) . '/';
+$root = rtrim(str_replace('\\', '/', realpath(__DIR__ . '/../')) . '/');
 define('ROOT_PATH', $root);
 
+// -------------------------------------
+// DOCUMENT ROOT (public folder)
+// -------------------------------------
+$docRoot = rtrim(str_replace('\\', '/', realpath($_SERVER['DOCUMENT_ROOT'])), '/');
+
 // ---------------------------------------------------------
-// BASE URL (Automatic, no hardcoding)
+// BASE URL (auto-detected, works everywhere)
 // ---------------------------------------------------------
-$docRoot = str_replace('\\', '/', realpath($_SERVER['DOCUMENT_ROOT']));
 $base_url = $protocol . $host . str_replace($docRoot, '', ROOT_PATH);
 
 // Normalize trailing slashes
 define('BASE_URL', rtrim($base_url, '/') . '/');
 
-// Core absolute paths
-// define('ROOT_PATH', $project_root);
+// ====================================================
+// SERVER PATH CONSTANTS (ABSOLUTE FILESYSTEM PATHS)
+// ====================================================
 define('CONFIG_PATH', ROOT_PATH . 'config/');
+define('CORE_PATH', ROOT_PATH . 'core/');
 define('LOGS_PATH', ROOT_PATH . 'logs/');
 define('INCLUDES_PATH', ROOT_PATH . 'includes/');
 define('ASSETS_PATH', ROOT_PATH . 'assets/');
 define('VIEWS_PATH', ROOT_PATH . 'views/');
 define('UPLOADS_PATH', ROOT_PATH . 'uploads/');
-define('COMPONENTS_PATH', ROOT_PATH . 'components/');
 
-define('DB_CONNECTION_PATH', INCLUDES_PATH . 'db_connection.php');
-define('LOGGER_PATH', INCLUDES_PATH . 'logger.php');
+// Core files
 define('CONFIG_FILE', CONFIG_PATH . 'config.php');
+define('PATHS_FILE', CONFIG_PATH . 'paths.php');
+define('DB_CONNECTION_PATH', CORE_PATH . 'db_connection.php');
+define('HEADER_DATA_FILE', CORE_PATH . 'HeaderData.php');
+define('FOOTER_DATA_FILE', CORE_PATH . 'FooterData.php');
 define('LOG_FILE', LOGS_PATH . 'app.log');
 
-// Asset URLs (for HTML)
+// Layout includes
+define('LAYOUT_HEAD_FILE', INCLUDES_PATH . 'layout_head.php');
+define('LAYOUT_FOOT_FILE', INCLUDES_PATH . 'layout_foot.php');
+define('FOOTER_FILE', INCLUDES_PATH . 'footer.php');
+define('HEADER_FILE', INCLUDES_PATH . 'header.php');
+define('LOGGER_PATH', INCLUDES_PATH . 'logger.php');
+
+
+// ====================================================
+// PUBLIC URL CONSTANTS (FOR USE IN HTML)
+// ====================================================
 define('ASSETS_URL', BASE_URL . 'assets/');
 define('CSS_URL', ASSETS_URL . 'css/');
 define('JS_URL', ASSETS_URL . 'js/');
 define('IMG_URL', ASSETS_URL . 'images/');
 define('ICON_URL', ASSETS_URL . 'icons/');
 
-// Core site links
-define('HOME_URL', BASE_URL . 'views/index.php');
-define('ABOUT_URL', BASE_URL . 'views/about.php');
-define('PROJECTS_URL', BASE_URL . 'views/projects.php');
-define('NOTES_URL', BASE_URL . 'views/notes.php');
-define('CONTACT_URL', BASE_URL . 'views/contact.php');
+// ====================================================
+// PAGE ROUTES
+// ====================================================
+define('VIEWS_URL', BASE_URL . 'views/');
+define('HOME_URL', VIEWS_URL . 'index.php');
+define('ABOUT_URL', VIEWS_URL . 'about.php');
+define('PROJECTS_URL', VIEWS_URL . 'projects.php');
+define('NOTES_URL', VIEWS_URL . 'notes.php');
+define('CONTACT_URL', VIEWS_URL . 'contact.php');
 
 // ---------------------------------------------------------
-// GLOBAL CONSTANTS
+// SITE GLOBAL CONSTANTS
 // ---------------------------------------------------------
 define('SITE_TITLE', 'Yogesh Lilake');
 define('SITE_LOGO', IMG_URL . 'logo.png');
@@ -66,7 +87,7 @@ define('CTA_LINK', ASSETS_URL . 'Yogesh_Lilake_Resume.pdf');
 define('ACCENT_COLOR', '#ff5a5a');
 
 // =============================
-// LIBRARY URLs
+// EXTERNAL LIBRARY URLs
 // =============================
 define('TAILWIND_CDN', 'https://cdn.tailwindcss.com');
 define('AOS_CSS', 'https://unpkg.com/aos@2.3.4/dist/aos.css');
@@ -74,9 +95,9 @@ define('AOS_JS', 'https://unpkg.com/aos@2.3.4/dist/aos.js');
 define('FONT_AWESOME', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
 define('LOTTIE_PLAYER', 'https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js');
 
-// =============================
-// ASSET PATH CONSTANTS
-// =============================
+// ====================================================
+// PAGE ROUTES
+// ====================================================
 // Global asset paths
 define('GLOBAL_CSS', CSS_URL . 'global.css');
 define('ANIMATIONS_CSS', CSS_URL . 'animations.css');

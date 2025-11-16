@@ -1,0 +1,132 @@
+@keyframes fade-down {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    text-shadow: 0 0 10px #d32f2f55, 0 0 20px #ff5a5a33;
+  }
+  50% {
+    text-shadow: 0 0 15px #ff8c5a88, 0 0 25px #ff5a5a55;
+  }
+}
+
+header {
+  animation: fade-down 0.9s ease-out;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 50;
+  transition: background 0.5s ease, backdrop-filter 0.5s ease,
+    box-shadow 0.5s ease;
+  background: transparent;
+  backdrop-filter: none;
+}
+
+header.active {
+  background: rgba(11, 11, 11, 0.75);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 6px 25px rgba(211, 47, 47, 0.25);
+}
+
+header.hide {
+  transform: translateY(-100%);
+  transition: transform 0.4s ease;
+}
+
+nav a {
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 0%;
+  height: 2px;
+  background: linear-gradient(to right, #d32f2f, #ff5a5a, #ff8c5a);
+  transition: width 0.3s ease;
+}
+
+nav a:hover::after,
+nav a.text-accent::after {
+  width: 100%;
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, #d32f2f, #ff5a5a, #ff8c5a);
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: glow 3s infinite ease-in-out;
+}
+
+#mobileMenu.show {
+  display: block !important;
+  animation: fade-down 0.4s ease-in-out;
+}
+
+.btn-glow {
+  box-shadow: 0 0 15px #d32f2f50;
+  transition: all 0.3s ease;
+}
+
+.btn-glow:hover {
+  box-shadow: 0 0 25px #ff5a5a88;
+  transform: scale(1.07);
+}
+
+/* Responsive Tweaks */
+@media (max-width: 768px) {
+  .logo-text {
+    font-size: 1rem;
+  }
+  .btn-glow {
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-text {
+    display: none;
+  }
+  .btn-glow {
+    display: none;
+  }
+  nav a {
+    font-size: 0.95rem;
+    padding: 0.4rem 0;
+  }
+}
+
+@media (min-width: 1600px) {
+  .logo-text {
+    font-size: 1.4rem;
+  }
+  nav a {
+    font-size: 1.05rem;
+  }
+}
