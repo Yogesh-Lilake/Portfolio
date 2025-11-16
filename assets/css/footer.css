@@ -1,0 +1,163 @@
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    text-shadow: 0 0 10px rgba(211, 47, 47, 0.4),
+      0 0 20px rgba(211, 47, 47, 0.3), 0 0 40px rgba(211, 47, 47, 0.2);
+    color: #ff5252;
+  }
+  50% {
+    text-shadow: 0 0 25px rgba(211, 47, 47, 0.8),
+      0 0 45px rgba(211, 47, 47, 0.6), 0 0 60px rgba(211, 47, 47, 0.4);
+    color: #ff6f6f;
+  }
+}
+
+@keyframes icon-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+footer {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(211, 47, 47, 0.15),
+    rgba(11, 11, 11, 1) 80%
+  );
+  animation: fade-up 0.8s ease-out;
+  overflow: hidden;
+}
+
+/* Moving gradient overlay */
+.footer-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    rgba(211, 47, 47, 0.2),
+    rgba(255, 255, 255, 0.05),
+    rgba(211, 47, 47, 0.2)
+  );
+  background-size: 300% 300%;
+  animation: gradientMove 12s ease-in-out infinite;
+  z-index: 0;
+  opacity: 0.25;
+}
+
+/* Floating glowing orbs */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(211, 47, 47, 0.35) 0%,
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+  animation: floatOrb 16s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.orb:nth-child(1) {
+  width: 200px;
+  height: 200px;
+  top: -50px;
+  left: 10%;
+  animation-delay: 0s;
+}
+.orb:nth-child(2) {
+  width: 150px;
+  height: 150px;
+  bottom: -60px;
+  right: 20%;
+  animation-delay: 4s;
+}
+.orb:nth-child(3) {
+  width: 250px;
+  height: 250px;
+  bottom: -80px;
+  left: 50%;
+  animation-delay: 8s;
+}
+
+@keyframes floatOrb {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-40px) translateX(20px);
+  }
+  100% {
+    transform: translateY(0) translateX(-20px);
+  }
+}
+
+footer a {
+  transition: all 0.3s ease;
+}
+
+footer a:hover {
+  color: #d32f2f;
+  transform: translateY(-2px);
+}
+
+.social-icon {
+  animation: icon-float 3s ease-in-out infinite;
+}
+
+.social-icon:hover {
+  color: #d32f2f;
+  animation: glow-pulse 1.2s infinite;
+}
+
+.footer-glow {
+  background: linear-gradient(
+    90deg,
+    rgba(211, 47, 47, 0.6),
+    rgba(255, 255, 255, 0.05),
+    rgba(211, 47, 47, 0.6)
+  );
+  height: 2px;
+  width: 100%;
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+.name-glow {
+  animation: glow-pulse 2.5s ease-in-out infinite;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.brand-hover:hover {
+  color: #ff5252;
+  text-shadow: 0 0 10px rgba(211, 47, 47, 0.7), 0 0 20px rgba(211, 47, 47, 0.6),
+    0 0 40px rgba(211, 47, 47, 0.4);
+}

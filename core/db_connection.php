@@ -30,7 +30,7 @@ class DB
 
         try {
             $this->pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-            echo "Database connected successfully.";
+            // echo "Database connected successfully.";
         } catch (PDOException $e) {
             app_log("DB Connection Failed", "error", ['error' => $e->getMessage()]);
             die("Database connection failed");

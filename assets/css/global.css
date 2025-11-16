@@ -1,0 +1,22 @@
+/* === Global Styles === */
+html {
+  scroll-behavior: smooth;
+  font-size: clamp(14px, 1vw + 0.5rem, 18px);
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* === Scroll Progress Bar === */
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ef4444, #ff7676);
+  z-index: 9999;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+  transition: width 0.25s ease-out;
+}
