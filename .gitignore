@@ -12,19 +12,19 @@ logs/
 # # ==========================
 # # SYSTEM / CACHE / TEMP
 # # ==========================
-# vendor/
-# node_modules/
-# *.cache
-# *.tmp
+vendor/
+node_modules/
+*.cache
+*.tmp
 
 # # ==========================
 # # OS FILES
 # # ==========================
-# .DS_Store
-# Thumbs.db
+.DS_Store
+Thumbs.db
 
 # # ==========================
 # # IDE Files
 # # ==========================
-# .vscode/
-# .idea/
+.vscode/
+.idea/
