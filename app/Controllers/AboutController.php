@@ -6,7 +6,6 @@ class AboutController extends Controller
 
     public function __construct()
     {
-        // Load AboutModel
         require_once ROOT_PATH . "app/Models/AboutModel.php";
         require_once ROOT_PATH . "app/Services/CacheService.php";
 
@@ -15,19 +14,19 @@ class AboutController extends Controller
 
     /**
      * ABOUT PAGE CONTROLLER
-     * Loads everything from cache → DB → fallback
      */
     public function index()
     {
         try {
-            // 1. Try to load from cache
+            // LOAD FROM CACHE
             $cached = CacheService::load("about_page");
 
-            if ($cached) {
+            // Only return cache if ANY section has real data
+            if (!empty($cached) && $this->hasRealData($cached)) {
                 return $cached;
             }
 
-            // 2. Load from DB (slow version)
+            // LOAD FROM DATABASE
             $data = [
                 "hero"       => $this->about->getHero(),
                 "content"    => $this->about->getContent(),
@@ -37,18 +36,18 @@ class AboutController extends Controller
                 "stats"      => $this->about->getStats(),
             ];
 
-            // 3. Save to cache
-            CacheService::save("about_page", $data);
+            // Save only if actual data exists
+            if ($this->hasRealData($data)) {
+                CacheService::save("about_page", $data);
+            }
 
             return $data;
 
         } catch (Throwable $e) {
 
-            app_log("AboutController@index failed", "error", [
-                "error" => $e->getMessage()
-            ]);
+            app_log("AboutController@index failed: " . $e->getMessage(), "error");
 
-            // 4. Emergency fallback (never break UI)
+            // EMERGENCY FALLBACK
             return [
                 "hero"       => [],
                 "content"    => ["greeting_title" => "About Me"],
@@ -58,5 +57,16 @@ class AboutController extends Controller
                 "stats"      => [],
             ];
         }
+    }
+
+    /**
+     * Checks if at least one section has content
+     */
+    private function hasRealData(array $data): bool
+    {
+        foreach ($data as $section) {
+            if (!empty($section)) return true;
+        }
+        return false;
     }
 }
