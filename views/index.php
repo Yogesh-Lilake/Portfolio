@@ -1,56 +1,67 @@
 <?php
-require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../app/Helpers/helpers.php';
-require_once __DIR__ . '/../app/Services/CacheService.php';
 
-require_once __DIR__ . '/../app/Models/HomeModel.php';
-require_once __DIR__ . '/../app/Models/AboutModel.php';
-require_once __DIR__ . '/../app/Models/SkillModel.php';
-require_once __DIR__ . '/../app/Models/ProjectModel.php';
-require_once __DIR__ . '/../app/Models/ContactModel.php';
+require_once __DIR__ . '/../config/paths.php';
+require_once INCLUDES_PATH . 'logger.php';
+require_once CORE_PATH . 'Controller.php';
+require_once CORE_PATH . 'App.php';
+
+// Run controller
+$data = App::run("HomeController@index");
+
+// Extract data
+$home     = $data["home"];
+$about    = $data["about"];
+$skills   = $data["skills"];
+$projects = $data["projects"];
+$contact  = $data["contact"];
 
 $page_title = "Yogesh Portfolio | Full Stack Developer";
 $custom_css = [INDEX_CSS];
 $custom_js  = [INDEX_JS];
 
 require_once LAYOUT_HEAD_FILE;
-
-// Load data using models
-$home     = (new HomeModel())->get();
-$about    = (new AboutModel())->get();
-$skills   = (new SkillModel())->all();
-$projects = (new ProjectModel())->featured();
-$contact  = (new ContactModel())->get();
-
 ?>
 
 <!-- HERO SECTION -->
 <section class="text-center py-24 sm:py-28 relative overflow-hidden parallax-bg"
     style="background-image:url('<?= htmlspecialchars($home['background_image']) ?>')">
+    
     <lottie-player 
         src="https://assets10.lottiefiles.com/packages/lf20_jcikwtux.json"
-        background="transparent" 
-        speed="1" loop autoplay 
+        background="transparent"
+        speed="1" loop autoplay
         style="position:absolute; inset:0; opacity:0.15; z-index:-1;">
     </lottie-player>
 
     <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 text-accent reveal">
         <?= $home['hero_heading'] ?>
     </h1>
+
     <p class="text-base sm:text-lg md:text-xl text-gray-300 mb-8 reveal max-w-2xl mx-auto">
-        <?= $home['hero_subheading'] ?>
+        <?= htmlspecialchars($home['hero_subheading']) ?>
     </p>
 
     <div class="flex flex-wrap justify-center gap-4 reveal">
-        <a href="<?= $home['projects_link'] ?>" class="bg-accent text-darkbg px-6 py-3 rounded-full font-semibold hover:bg-red-600 transition">View Projects</a>
-        <a href="<?= $home['cv_link'] ?>" class="border border-accent text-accent px-6 py-3 rounded-full font-semibold hover:bg-accent hover:text-darkbg transition">Download CV</a>
+        <a href="<?= htmlspecialchars($home['projects_link']) ?>" 
+            class="bg-accent text-darkbg px-6 py-3 rounded-full font-semibold hover:bg-red-600 transition">
+            View Projects
+        </a>
+        <a href="<?= htmlspecialchars($home['cv_link']) ?>" 
+            class="border border-accent text-accent px-6 py-3 rounded-full font-semibold hover:bg-accent hover:text-darkbg transition">
+            Download CV
+        </a>
     </div>
 </section>
 
 <!-- ABOUT -->
 <section class="py-20 px-4 sm:px-10 lg:px-20 text-center bg-[#111827] reveal-left">
-    <h2 class="text-3xl sm:text-4xl font-bold mb-8 text-accent"><?= htmlspecialchars($about['title']) ?></h2>
-    <p class="max-w-3xl mx-auto text-gray-300 leading-relaxed text-base sm:text-lg lg:text-xl"><?= nl2br(htmlspecialchars($about['content'])) ?></p>
+    <h2 class="text-3xl sm:text-4xl font-bold mb-8 text-accent">
+        <?= htmlspecialchars($about['title']) ?>
+    </h2>
+
+    <p class="max-w-3xl mx-auto text-gray-300 leading-relaxed text-base sm:text-lg lg:text-xl">
+        <?= nl2br(htmlspecialchars($about['content'])) ?>
+    </p>
 </section>
 
 <!-- SKILLS -->
@@ -69,7 +80,7 @@ $contact  = (new ContactModel())->get();
                 <?php endforeach; ?>
             <?php endif; ?>
         </div>
-    </div> 
+    </div>
 </section>
 
 <!-- PROJECTS -->
@@ -85,23 +96,37 @@ $contact  = (new ContactModel())->get();
                     <div class="p-6">
                         <h3 class="text-xl font-semibold mb-2"><?= htmlspecialchars($p['title']) ?></h3>
                         <p class="text-gray-400 text-sm mb-4"><?= htmlspecialchars($p['description']) ?></p>
-                        <a href="<?= htmlspecialchars($p['project_link']) ?>" class="text-accent hover:underline">View →</a>
+
+                        <a href="<?= htmlspecialchars($p['project_link']) ?>" class="text-accent hover:underline">
+                            View →
+                        </a>
                     </div>
                 </div>
             <?php endforeach; ?>
-        </div>
-        <div class="text-center mt-10">
-            <a href="projects.php" class="border border-accent text-accent px-6 py-3 rounded-full hover:bg-accent hover:text-darkbg transition"> See All Projects </a>
-        </div>
         <?php endif; ?>
+    </div>
+
+    <div class="text-center mt-10">
+        <a href="projects.php" class="border border-accent text-accent px-6 py-3 rounded-full hover:bg-accent hover:text-darkbg transition">
+            See All Projects
+        </a>
     </div>
 </section>
 
 <!-- CONTACT -->
 <section class="py-20 px-4 sm:px-10 lg:px-20 text-center reveal-right">
-    <h3 class="text-3xl sm:text-4xl font-bold mb-8 text-accent"><?= htmlspecialchars($contact['title']) ?></h3>
-    <p class="text-gray-300 mb-10 max-w-xl sm:max-w-2xl mx-auto text-base sm:text-lg"><?= htmlspecialchars($contact['subtitle']) ?></p>
-    <a href="<?= $contact['button_link'] ?>" class="bg-accent text-darkbg px-6 py-3 rounded-full font-semibold hover:bg-red-600 transition"><?= $contact['button_text'] ?></a>
+    <h3 class="text-3xl sm:text-4xl font-bold mb-8 text-accent">
+        <?= htmlspecialchars($contact['title']) ?>
+    </h3>
+
+    <p class="text-gray-300 mb-10 max-w-xl sm:max-w-2xl mx-auto text-base sm:text-lg">
+        <?= htmlspecialchars($contact['subtitle']) ?>
+    </p>
+
+    <a href="<?= htmlspecialchars($contact['button_link']) ?>" 
+       class="bg-accent text-darkbg px-6 py-3 rounded-full font-semibold hover:bg-red-600 transition">
+       <?= htmlspecialchars($contact['button_text']) ?>
+    </a>
 </section>
 
 <?php require_once LAYOUT_FOOT_FILE; ?>

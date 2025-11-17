@@ -1,35 +1,26 @@
 <?php
-require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../core/Controller.php';
-require_once __DIR__ . '/../app/Models/AboutModel.php';
-require_once __DIR__ . '/../app/Services/CacheService.php';
+require_once __DIR__ . '/../config/paths.php';
+require_once INCLUDES_PATH . 'logger.php';
+require_once CORE_PATH . 'Controller.php';
+require_once CORE_PATH . 'App.php';
 
-$model = new AboutModel();
-$cache = new CacheService();
+// Run controller
+$data = App::run("AboutController@index");
 
-// ==========================
-// LOAD FROM CACHE OR DB
-// ==========================
-$data = $cache->load('about');
+// Extract data
+$hero       = $data["hero"];
+$content    = $data["content"];
+$skills     = $data["skills"];
+$experience = $data["experience"];
+$education  = $data["education"];
+$stats      = $data["stats"];
 
 $page_title = "About | " . SITE_TITLE;
 $custom_css = [ABOUT_CSS];
 $custom_js  = [ABOUT_JS];
 
-if (!$data) {
-    $data = [
-        "hero"       => $model->getHero(),
-        "content"    => $model->getContent(),
-        "skills"     => $model->getSkills(),
-        "experience" => $model->getExperience(),
-        "education"  => $model->getEducation(),
-        "stats"      => $model->getStats(),
-    ];
-
-    $cache->save('about', $data);
-}
-
 require_once LAYOUT_HEAD_FILE;
+
 ?>
 
 <!-- HERO -->
