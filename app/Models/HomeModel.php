@@ -6,19 +6,30 @@ class HomeModel {
 
     public function get()
     {
-        // 1. Load from cache
+        // 1. Try cache
         if ($cache = CacheService::load($this->cacheKey)) {
             return $cache;
         }
 
         // 2. Fetch from DB
-        $sql = "SELECT * FROM home_section WHERE is_active = 1 LIMIT 1";
-        $row = safe_fetch(safe_query($sql));
+        try {
+            $pdo = DB::getInstance()->pdo();
 
-        // 3. Fallback
-        if (!$row) $row = $this->defaults();
+            $stmt = $pdo->prepare("SELECT * FROM home_section WHERE is_active = 1 LIMIT 1");
+            $stmt->execute();
 
-        // 4. Save to cache
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (Throwable $e) {
+            app_log("HomeModel DB error: " . $e->getMessage(), "error");
+            $row = null;
+        }
+
+        // 3. Fallback defaults (never break page)
+        if (!$row) {
+            $row = $this->defaults();
+        }
+
+        // 4. Save to cache (DB or fallback)
         CacheService::save($this->cacheKey, $row);
 
         return $row;

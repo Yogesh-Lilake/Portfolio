@@ -12,16 +12,33 @@ class AboutModel {
     {
         if ($cache = CacheService::load($this->cacheKey)) return $cache;
 
-        $row = safe_fetch(safe_query("SELECT * FROM about_section WHERE is_active = 1 LIMIT 1"));
+        // 2. Fetch from DB
+        try{
+            $pdo = DB::getInstance()->pdo();
 
-        if (!$row) $row = [
-            "title" => "About Me",
-            "content" => "Hi, I'm Yogesh. I build optimized, scalable and user-friendly applications."
-        ];
+            $stmt = $pdo->prepare("SELECT * FROM about_section WHERE is_active = 1 LIMIT 1");
+            $stmt->execute();
 
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        }catch (Throwable $e) {
+            app_log("AboutModel DB error: " . $e->getMessage(), "error");
+            $row = null;
+        }
+
+        // Fallback defaults
+        if (!$row) $row = $this->defaults();
+
+        // Save cache
         CacheService::save($this->cacheKey, $row);
 
         return $row;
+    }
+
+    public function defaults(){
+        return [
+            "title" => "About Me",
+            "content" => "Hi, I'm Yogesh. I build optimized, scalable and user-friendly applications."
+        ];
     }
 
     /**

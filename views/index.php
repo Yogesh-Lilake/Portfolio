@@ -1,6 +1,5 @@
 <?php
-
-require_once __DIR__ . '/../config/paths.php';
+require_once __DIR__ . '/../config/config.php';
 require_once INCLUDES_PATH . 'logger.php';
 require_once CORE_PATH . 'Controller.php';
 require_once CORE_PATH . 'App.php';
@@ -60,7 +59,7 @@ require_once LAYOUT_HEAD_FILE;
     </h2>
 
     <p class="max-w-3xl mx-auto text-gray-300 leading-relaxed text-base sm:text-lg lg:text-xl">
-        <?= nl2br(htmlspecialchars($about['content'])) ?>
+        <?= $about['content'] ?>
     </p>
 </section>
 

@@ -7,22 +7,36 @@ class ProjectModel {
     private $cacheKeyFeatured = "featured_projects";
     private $cacheKeyAll = "projects_all";
 
+    /**
+     * Featured projects (Home page)
+     */
     public function featured()
     {
         if ($cache = CacheService::load($this->cacheKeyFeatured)) return $cache;
 
-        try {
-            $rows = safe_fetch_all(
-                safe_query("SELECT * FROM projects WHERE is_active = 1 AND is_featured = 1 ORDER BY id DESC")
-            );
+        $rows = [];
 
-            CacheService::save($this->cacheKeyFeatured, $rows);
-            return $rows;
+        try {
+            $pdo = DB::getInstance()->pdo();
+
+            $stmt = $pdo->prepare("SELECT * FROM projects WHERE is_active = 1 AND is_featured = 1 ORDER BY id DESC");
+            $stmt->execute();
+
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         } catch (Throwable $e) {
             app_log("ProjectModel:featured() failed", "error", ['error' => $e->getMessage()]);
-            return [];
+            $rows = [];
         }
+
+        // 3. Fallback defaults (never break page)
+        if (!$rows) {
+            $rows = $this->defaults();
+        }
+
+        CacheService::save($this->cacheKeyFeatured, $rows);
+
+        return $rows;
     }
 
     /**
@@ -33,18 +47,28 @@ class ProjectModel {
         if ($cache = CacheService::load($this->cacheKeyAll))
             return $cache;
 
-        try {
-            $rows = safe_fetch_all(
-                safe_query("SELECT * FROM projects WHERE is_active = 1 ORDER BY sort_order ASC, id DESC")
-            );
+        $rows = [];
 
-            CacheService::save($this->cacheKeyAll, $rows);
-            return $rows;
+        try {
+            $pdo = DB::getInstance()->pdo();
+
+            $stmt = $pdo->prepare("
+                SELECT * 
+                FROM projects
+                WHERE is_active = 1
+                ORDER BY sort_order ASC, id DESC
+            ");
+            $stmt->execute();
+
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         } catch (Throwable $e) {
             app_log("ProjectModel:getAllActive() failed", "error", ['error' => $e->getMessage()]);
-            return [];
+            $rows = [];
         }
+
+        CacheService::save($this->cacheKeyAll, $rows);
+        return $rows;
     }
 
     /**
@@ -127,13 +151,44 @@ class ProjectModel {
     public function getTechList($projectId)
     {
         try {
-            return safe_fetch_all(
-                safe_query("SELECT tech_name, color_class FROM project_tech WHERE project_id = ?", [$projectId])
-            );
+            $pdo = DB::getInstance()->pdo();
+
+            $stmt = $pdo->prepare("
+                SELECT tech_name, color_class 
+                FROM project_tech 
+                WHERE project_id = ?
+            ");
+            $stmt->execute([$projectId]);
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         } catch (Throwable $e) {
             app_log("ProjectModel:getTechList() failed", "error", ['project_id' => $projectId]);
             return [];
         }
+    }
+
+    private function defaults()
+    {
+        return [
+            [
+                "title"       => "Portfolio Website",
+                "description" => "A dynamic PHP + MySQL portfolio site with caching, MVC, and enterprise structure.",
+                "image_path"  => IMG_URL . "default-project.jpg",
+                "project_link" => "#"
+            ],
+            [
+                "title"       => "E-Commerce Backend",
+                "description" => "Advanced cart system, user roles, and secure checkout with PHP PDO.",
+                "image_path"  => IMG_URL . "default-project.jpg",
+                "project_link" => "#"
+            ],
+            [
+                "title"       => "Admin Dashboard UI",
+                "description" => "Tailwind + JS dashboard with charts, tables, stats, and dark mode.",
+                "image_path"  => IMG_URL . "default-project.jpg",
+                "project_link" => "#"
+            ]
+        ];
     }
 }

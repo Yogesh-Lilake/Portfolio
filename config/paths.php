@@ -44,7 +44,7 @@ define('UPLOADS_PATH', ROOT_PATH . 'uploads/');
 // Core files
 define('CONFIG_FILE', CONFIG_PATH . 'config.php');
 define('PATHS_FILE', CONFIG_PATH . 'paths.php');
-define('DB_CONNECTION_PATH', CORE_PATH . 'db_connection.php');
+define('DB_CONNECTION_FILE', CORE_PATH . 'db_connection.php');
 define('HEADER_DATA_FILE', CORE_PATH . 'HeaderData.php');
 define('FOOTER_DATA_FILE', CORE_PATH . 'FooterData.php');
 define('LOG_FILE', LOGS_PATH . 'app.log');
