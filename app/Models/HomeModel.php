@@ -13,11 +13,15 @@
 class HomeModel
 {
     private string $cacheKey = "home";
-    private int $defaultTTL = 3600; // 1 hour (tunable)
+    private string $defaultPath;
+    // private int $defaultTTL = 3600; // 1 hour (tunable)
 
     public function __construct()
     {
         require_once ROOT_PATH . "app/Services/CacheService.php";
+
+        // Path to /resources/defaults/home.json
+        $this->defaultPath = ROOT_PATH . "app/resources/defaults/home/home.json";
     }
 
 
@@ -25,19 +29,21 @@ class HomeModel
      * PUBLIC: Returns the hero/home section
      * ============================================================ */
 
-    public function get(): array
+    public function get(bool $pure = false): array
     {
-        // 1. CACHE
-        if ($cache = CacheService::load($this->cacheKey)) {
-            return $cache;
-        }
+        // Return pure DB result (no fallback mixing) Or Normal fallback system
+        return $pure ? $this->getOnlyDB() : $this->getFallbackMode();
 
+    }
+
+    private function getOnlyDB(): array{
         // 2. DB FETCH
         try {
             $pdo = DB::getInstance()->pdo();
+            // Actual table name `home_section`
             $stmt = $pdo->prepare("
                 SELECT * 
-                FROM home_section 
+                FROM home_section
                 WHERE is_active = 1 
                 LIMIT 1
             ");
@@ -47,7 +53,7 @@ class HomeModel
 
             // Save ONLY if DB returned meaningful data
             if (!empty($row)) {
-                CacheService::save($this->cacheKey, $row, $this->defaultTTL);
+                CacheService::save($this->cacheKey, $row);
                 return $row;
             }
 
@@ -55,14 +61,33 @@ class HomeModel
 
             // Never crash the home page — log and fallback
             app_log("HomeModel@get error: " . $e->getMessage(), "error");
+            return [];
+        }
+    }
+
+    private function getFallbackMode(): array{
+        /** A. Try cache */
+        if ($cache = CacheService::load($this->cacheKey)) {
+            return $cache;
         }
 
-        // 3. ABSOLUTE SAFE DEFAULTS
-        $defaults = $this->defaultHome();
+        /** B. Try DB */
+        $row = $this->getOnlyDB();
+        if (!empty($row)) {
+            CacheService::save($this->cacheKey, $row);
+            return $row;
+        }
 
-        CacheService::save($this->cacheKey, $defaults, $this->defaultTTL);
+        /** C. Try default JSON */
+        if (file_exists($this->defaultPath)) {
+            $json = json_decode(file_get_contents($this->defaultPath), true);
+            if (!empty($json)) {
+                return $json; // DO NOT CACHE THIS
+            }
+        }
 
-        return $defaults;
+        /** D. Hard-coded fallback */
+        return $this->defaultHome();
     }
 
 
@@ -73,14 +98,16 @@ class HomeModel
     public function defaultHome(): array
     {
         return [
-            "hero_title"       => "Hi, I’m " . SITE_TITLE . " 👋",
-            "hero_subtitle"    => "Full Stack & Android Developer | Turning ideas into scalable digital products.",
+            "hero_heading"       => "Hi, I’m " . SITE_TITLE . " 👋",
+            "hero_subheading"    => "Full Stack & Android Developer | Turning ideas into scalable digital products.",
+            "projects_link"    => "projects.php",
+            "cv_link"          => "assets/cv/Yogesh-CV.pdf",
             "hero_description" => "I build fast, modern, scalable applications using PHP, MySQL, JavaScript, TailwindCSS, and Android.",
             "cta_projects"     => "View Projects",
             "cta_contact"      => "Contact Me",
             "animation_url"    => "https://assets10.lottiefiles.com/packages/lf20_kyu7xb1v.json",
             "background_image" => IMG_URL . "default-hero-bg.jpg",
-            "is_active"        => 1
+            "is_active"        => true
         ];
     }
 }

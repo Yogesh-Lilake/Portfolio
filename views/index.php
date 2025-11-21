@@ -8,11 +8,20 @@ require_once CORE_PATH . 'App.php';
 $data = App::run("HomeController@index");
 
 // Extract data
-$home     = $data["home"];
-$about    = $data["about"];
-$skills   = $data["skills"];
-$projects = $data["projects"];
-$contact  = $data["contact"];
+$skills   = $data["skills"]["data"] ?? [];
+$projects = $data["projects"]["data"] ?? [];
+$about    = $data["about"]["data"] ?? [];
+$home     = $data["home"]["data"] ?? [];
+$contact  = $data["contact"]["data"] ?? [];
+
+function safe($value) {
+    return htmlspecialchars($value ?? "", ENT_QUOTES, 'UTF-8');
+}
+
+function field($array, $key, $default = "") {
+    return isset($array[$key]) ? safe($array[$key]) : $default;
+}
+
 
 $page_title = "Yogesh Portfolio | Full Stack Developer";
 $custom_css = [INDEX_CSS];
@@ -23,7 +32,7 @@ require_once LAYOUT_HEAD_FILE;
 
 <!-- HERO SECTION -->
 <section class="text-center py-24 sm:py-28 relative overflow-hidden parallax-bg"
-    style="background-image:url('<?= htmlspecialchars($home['background_image']) ?>')">
+    style="background-image:url('<?= safe($home['background_image']) ?>')">
     
     <lottie-player 
         src="https://assets10.lottiefiles.com/packages/lf20_jcikwtux.json"
@@ -37,15 +46,15 @@ require_once LAYOUT_HEAD_FILE;
     </h1>
 
     <p class="text-base sm:text-lg md:text-xl text-gray-300 mb-8 reveal max-w-2xl mx-auto">
-        <?= htmlspecialchars($home['hero_subheading']) ?>
+        <?= safe($home['hero_subheading']) ?>
     </p>
 
     <div class="flex flex-wrap justify-center gap-4 reveal">
-        <a href="<?= htmlspecialchars($home['projects_link']) ?>" 
+        <a href="<?= safe($home['projects_link']) ?>" 
             class="bg-accent text-darkbg px-6 py-3 rounded-full font-semibold hover:bg-red-600 transition">
             View Projects
         </a>
-        <a href="<?= htmlspecialchars($home['cv_link']) ?>" 
+        <a href="<?= safe($home['cv_link']) ?>" 
             class="border border-accent text-accent px-6 py-3 rounded-full font-semibold hover:bg-accent hover:text-darkbg transition">
             Download CV
         </a>
@@ -55,7 +64,7 @@ require_once LAYOUT_HEAD_FILE;
 <!-- ABOUT -->
 <section class="py-20 px-4 sm:px-10 lg:px-20 text-center bg-[#111827] reveal-left">
     <h2 class="text-3xl sm:text-4xl font-bold mb-8 text-accent">
-        <?= htmlspecialchars($about['title']) ?>
+        <?= safe($about['title']) ?>
     </h2>
 
     <p class="max-w-3xl mx-auto text-gray-300 leading-relaxed text-base sm:text-lg lg:text-xl">
@@ -73,8 +82,8 @@ require_once LAYOUT_HEAD_FILE;
             <?php else: ?>
                 <?php foreach ($skills as $s): ?>
                     <div class="p-4 bg-[#1E293B] rounded-xl hover:bg-accent hover:text-darkbg transition transform hover:scale-105">
-                        <i class="<?= $s['icon_class'] ?> <?= $s['color_class'] ?> text-3xl sm:text-4xl md:text-5xl mb-3"></i>
-                        <h4 class="font-semibold"><?= htmlspecialchars($s['skill_name']) ?></h4>
+                        <i class="<?= $s['icon_class'] ?> <?= field($s, 'color_class') ?> text-3xl sm:text-4xl md:text-5xl mb-3"></i>
+                        <h4 class="font-semibold"><?= field($s, 'skill_name') ?></h4>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
@@ -91,12 +100,12 @@ require_once LAYOUT_HEAD_FILE;
         <?php else: ?>
             <?php foreach ($projects as $p): ?>
                 <div class="bg-[#1E293B] rounded-xl overflow-hidden shadow-lg hover:scale-105 transition">
-                    <img src="<?= htmlspecialchars($p['image_path']) ?>" alt="<?= htmlspecialchars($p['title']) ?>" class="aspect-video w-full object-cover">
+                    <img src="<?= field($p, 'image_path') ?>" alt="<?= field($p, 'title') ?>" class="aspect-video w-full object-cover">
                     <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2"><?= htmlspecialchars($p['title']) ?></h3>
-                        <p class="text-gray-400 text-sm mb-4"><?= htmlspecialchars($p['description']) ?></p>
+                        <h3 class="text-xl font-semibold mb-2"><?= field($p, 'title') ?></h3>
+                        <p class="text-gray-400 text-sm mb-4"><?= field($p, 'description') ?></p>
 
-                        <a href="<?= htmlspecialchars($p['project_link']) ?>" class="text-accent hover:underline">
+                        <a href="<?= field($p, 'project_link') ?>" class="text-accent hover:underline">
                             View →
                         </a>
                     </div>
@@ -115,16 +124,16 @@ require_once LAYOUT_HEAD_FILE;
 <!-- CONTACT -->
 <section class="py-20 px-4 sm:px-10 lg:px-20 text-center reveal-right">
     <h3 class="text-3xl sm:text-4xl font-bold mb-8 text-accent">
-        <?= htmlspecialchars($contact['title']) ?>
+        <?= field($contact, 'title') ?>
     </h3>
 
     <p class="text-gray-300 mb-10 max-w-xl sm:max-w-2xl mx-auto text-base sm:text-lg">
-        <?= htmlspecialchars($contact['subtitle']) ?>
+        <?= field($contact, 'subtitle') ?>
     </p>
 
-    <a href="<?= htmlspecialchars($contact['button_link']) ?>" 
+    <a href="<?= field($contact, 'button_link') ?>" 
        class="bg-accent text-darkbg px-6 py-3 rounded-full font-semibold hover:bg-red-600 transition">
-       <?= htmlspecialchars($contact['button_text']) ?>
+       <?= field($contact, 'button_text') ?>
     </a>
 </section>
 

@@ -38,10 +38,9 @@ class HomeController extends Controller
             /* ---------------------------------------------------
              * 1. Try loading full page from cache
              * --------------------------------------------------- */
-            $cached = CacheService::load($this->cacheKey);
-
-            if (!empty($cached) && $this->hasRealData($cached)) {
-                return $cached;  // cache hit
+            /* Cache → whole page */
+            if ($cached = CacheService::load($this->cacheKey)) {
+                return $cached;
             }
 
             /* ---------------------------------------------------
@@ -55,9 +54,10 @@ class HomeController extends Controller
                 "contact"  => $this->safeLoad(fn() => $this->contact->get(),    "contact"),
             ];
 
-            /* ---------------------------------------------------
-             * 3. Save to cache only if meaningful
-             * --------------------------------------------------- */
+
+            // /* ---------------------------------------------------
+            //  * 3. Save to cache only if ALL data came from DB
+            //  * --------------------------------------------------- */
             if ($this->hasRealData($data)) {
                 CacheService::save($this->cacheKey, $data);
             }
@@ -93,11 +93,47 @@ class HomeController extends Controller
     private function safeLoad(callable $fn, string $label)
     {
         try {
-            $value = $fn();
-            return !empty($value) ? $value : $this->fallback($label);
+            $data = $fn();
+
+            // If model returned non-array → fix it
+            if (!is_array($data)) {
+                // return ["from_db" => false] + $this->fallback($label);
+                // convert to bootom return statement because create 1 extra black field in skills and others section
+                return [
+                    "from_db" => false,
+                    "data"    => $this->fallback($label)
+                ];
+            }
+
+            // CASE 1: Model returned fallback defaults (contains is_default)
+            if (isset($data["is_default"]) && $data["is_default"] === true) {
+                return [
+                    "from_db" => false,
+                    "data"    => $data
+                ];
+            }
+
+            // CASE 2: Real DB data
+            if (!empty($data)) {
+                return [
+                    "from_db" => true,
+                    "data"    => $data
+                ];
+            }
+
+            // CASE 3: Nothing returned → fallback
+            return [
+                "from_db" => false,
+                "data"    => $this->fallback($label)
+            ];
         } catch (Throwable $e) {
             app_log("HomeController: Failed loading section {$label}: " . $e->getMessage(), "warning");
-            return $this->fallback($label);
+            
+            // return ["from_db" => false] + $this->fallback($label);
+            return [
+                "from_db" => false,
+                "data"    => $this->fallback($label)
+            ];
         }
     }
 
@@ -114,17 +150,28 @@ class HomeController extends Controller
         return match ($section) {
 
             "home" => [
-                "title"       => "Welcome",
-                "subtitle"    => SITE_TITLE,
-                "button_text" => "Explore",
+                "hero_heading"       => "Hi, I’m " . SITE_TITLE . " 👋",
+                "hero_subheading"    => "Full Stack & Android Developer | Turning ideas into scalable digital products.",
+                "hero_description"   => "I build fast, modern, scalable applications using PHP, MySQL, JavaScript, TailwindCSS, and Android.",
+                "projects_link"      => "project.php",
+                "cv_link"            => "assets/cv/Yogesh-CV.pdf",
+                "animation_url"    => "https://assets10.lottiefiles.com/packages/lf20_kyu7xb1v.json",
+                "background_image"   => IMG_URL . "default-hero-bg.jpg",
+                "cta_projects"       => "View Projects",
+                "cta_contact"        => "Contact Me",
+                "is_active"        => true
             ],
 
             "about" => [
-                "greeting_title" => "About Me",
+                "title"   => "About Me",
+                "content" => "Hi, I'm Yogesh. I build optimized, scalable and user-friendly applications.",
             ],
 
             "contact" => [
-                "email" => SUPPORT_EMAIL ?? "contact@example.com",
+                "title"       => "Contact Me",
+                "subtitle"    => "You can reach me anytime.",
+                "button_text" => "Email Us",
+                "button_link" => "mailto:contact@example.com",
             ],
 
             default => []
@@ -140,8 +187,11 @@ class HomeController extends Controller
     private function hasRealData(array $data): bool
     {
         foreach ($data as $section) {
-            if (!empty($section)) return true;
+            // fallback sections contain "is_default" OR empty
+            if (!is_array($section) || (isset($section["from_db"]) && $section["from_db"] !== true)) {
+                return false; // fallback → do not cache
+            }
         }
-        return false;
+        return true;
     }
 }

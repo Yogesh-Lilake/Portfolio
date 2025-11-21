@@ -2,38 +2,67 @@
 
 class ContactModel {
 
-    private $cacheKey = "contact";
+    private string $cacheKey = "contact";
+    private string $defaultJson = ROOT_PATH . "app/resources/defaults/home/contact.json";
 
     public function get()
     {
-        if ($cache = CacheService::load($this->cacheKey)) return $cache;
+        /** ----------------------------------------------------
+         * A. TRY CACHE
+         * ----------------------------------------------------*/
+        if ($cache = CacheService::load($this->cacheKey)) {
+            return $cache;
+        }
 
-        try{
+        /** ----------------------------------------------------
+         * B. TRY DATABASE
+         * ----------------------------------------------------*/
+        try {
             $pdo = DB::getInstance()->pdo();
 
-            $stmt = $pdo->prepare("SELECT * FROM contact_section WHERE is_active = 1 LIMIT 1");
+            $stmt = $pdo->prepare("
+                SELECT title, subtitle, button_text, button_link
+                FROM contact_section
+                WHERE is_active = 1
+                LIMIT 1
+            ");
             $stmt->execute();
 
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        }catch (Throwable $e){
+
+            if (!empty($row)) {
+                CacheService::save($this->cacheKey, $row);
+                return $row;
+            }
+
+        } catch (Throwable $e) {
             app_log("ContactModel DB error: " . $e->getMessage(), "error");
-            $row = null;
         }
 
-        if (!$row) $row = $this->defaults();
+        /** ----------------------------------------------------
+         * C. TRY DEFAULT JSON FILE
+         * ----------------------------------------------------*/
+        if (file_exists($this->defaultJson)) {
+            $json = json_decode(file_get_contents($this->defaultJson), true);
+            if (!empty($json) && is_array($json)) {
+                return $json;
+            }
+        }
 
-        CacheService::save($this->cacheKey, $row);
-
-        return $row;
+        /** ----------------------------------------------------
+         * D. HARD-CODED DEFAULT FALLBACK
+         * ----------------------------------------------------*/
+        return $this->defaults();
     }
 
-    private function defaults()
+    private function defaults(): array
     {
         return [
-            "title"        => "Get In Touch",
-            "subtitle"     => "Feel free to contact me for collaborations, projects, or job opportunities.",
-            "button_text"  => "Contact Me",
-            "button_link"  => "contact.php"
+            "is_default"  => true,
+            "title"       => "Get In Touch",
+            "subtitle"    => "Feel free to contact me for collaborations, projects, or job opportunities.",
+            "button_text" => "Contact Me",
+            "button_link" => "contact.php"
         ];
     }
 }
