@@ -1,158 +1,221 @@
 <?php
 /**
  * AboutModel
+ * ---------------------------------------------------------------
+ * Provides the full “DB → Cache → Default JSON → Hard fallback”
+ * data-loading architecture for every About page section.
  *
- * Enterprise-grade About page model.
- * - Returns DB -> cache -> defaults
- * - Never allows the UI to receive an empty/blank response
- * - Only saves non-empty DB results to cache
- */
+ * This ensures:
+ *  - UI NEVER receives empty or invalid arrays
+ *  - DB errors do NOT break the page
+ *  - Caching happens ONLY when DB returns valid data
+ *  - JSON defaults allow easy static editing
+*/
 
 class AboutModel {
 
+    /** General fallback key used for the main about section */
     private string $cacheKey = "about";
-    private int $defaultTTL = 3600; // seconds for section caches (tunable)
+
+    /** Path to default JSON files (residing in /resources/defaults/about/) */
+    private string $defaultPath;
+    // private int $defaultTTL = 3600; // seconds for section caches (tunable)
 
     public function __construct() {
         require_once ROOT_PATH . "app/Services/CacheService.php";
+
+        // Store folder containing all default JSON files
+        $this->defaultPath = ROOT_PATH . "app/resources/defaults/about/";
     }
 
     /**
-     * BASIC ABOUT SECTION (single record)
-     */
+     * Basic single-record loader for about_section
+     * (This is separate from unified loader for legacy compatibility)
+    */
     public function get()
     {
-        $cache = CacheService::load($this->cacheKey);
-        if (!empty($cache)) return $cache;
+        // Try cache first
+        if ($cache = CacheService::load($this->cacheKey)) {
+            return $cache;
+        }
 
         try {
+            // DB query
             $pdo = DB::getInstance()->pdo();
             $stmt = $pdo->prepare("SELECT * FROM about_section WHERE is_active = 1 LIMIT 1");
             $stmt->execute();
-            $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
+            // Only save when DB returns valid data
             if (!empty($row)) {
                 CacheService::save($this->cacheKey, $row);
-            }
-
-            return $row ?: $this->defaults();
-
-        } catch (Throwable $e) {
-            app_log("AboutModel@get error: " . $e->getMessage(), "error");
-            return $this->defaults();
-        }
-    }
-
-    /**
-     * Load a single-record section (with defaults fallback)
-     *
-     * @param string $table DB table name
-     * @param string $key cache key name
-     * @param callable $defaultFn function returning defaults
-     */
-    private function loadSingleWithDefault(string $table, string $key, callable $defaultFn)
-    {
-        // 1. cache
-        if ($cached = CacheService::load($key)) {
-            return $cached;
-        }
-
-        // 2. db
-        try {
-            $pdo = DB::getInstance()->pdo();
-            $stmt = $pdo->prepare("SELECT * FROM {$table} WHERE is_active = 1 LIMIT 1");
-            $stmt->execute();
-            $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
-
-            if (!empty($row)) {
-                CacheService::save($key, $row, $this->defaultTTL);
                 return $row;
             }
 
-            // 3. fallback default
-            return $defaultFn();
-
         } catch (Throwable $e) {
-            app_log("AboutModel@loadSingleWithDefault error ({$table}): " . $e->getMessage(), "error");
-            return $defaultFn();
+            app_log("AboutModel@get error: " . $e->getMessage(), "error");
         }
+
+        /** ----------------------------------------------------
+        * C. TRY DEFAULT JSON FILE
+        * ----------------------------------------------------*/
+        $jsonFile = ROOT_PATH . "app/resources/defaults/home/about.json";
+
+        if (file_exists($jsonFile)) {
+            $json = json_decode(file_get_contents($jsonFile), true);
+            if (!empty($json) && is_array($json)) {
+                return $json;
+            }
+        }
+
+        /** ----------------------------------------------------
+        * D. HARD-CODED FALLBACK
+        * ----------------------------------------------------*/
+        return $this->defaults();
     }
+
+    /* ============================================================
+     * UNIFIED FALLBACK LOADER
+     * ============================================================ */
 
     /**
-     * Load multi-row sections (with defaults fallback)
+     * Loads ANY About page section using:
      *
-     * @param string $table
-     * @param string $key
-     * @param callable $defaultFn
-     * @return array
-     */
-    private function loadMultipleWithDefault(string $table, string $key, callable $defaultFn): array
-    {
-        if ($cached = CacheService::load($key)) {
-            return $cached;
+     * A. Try cache
+     * B. Try DB (single or multiple rows)
+     * C. Try default JSON file (if exists)
+     * D. Hard-coded fallback defaults
+     *
+     * @param string    $cacheKey   Cache identifier
+     * @param string    $table       Database table name
+     * @param string    $jsonFile    Default JSON file name
+     * @param callable  $fallbackFn  Function returning default PHP data
+     * @param bool      $single      If true → LIMIT 1, else → fetchAll()
+    */
+    private function loadUnified(string $cacheKey, string $table, string $jsonFile, callable $fallbackFn, bool $single = false){
+        
+        /** ----------------------------------------------------
+         * A. Check cache
+         * ---------------------------------------------------- */
+        if ($cache = CacheService::load($cacheKey)) {
+            return $cache;
         }
 
+        /** ----------------------------------------------------
+         * B. Attempt DB fetch
+         * ---------------------------------------------------- */
         try {
             $pdo = DB::getInstance()->pdo();
-            $stmt = $pdo->prepare("SELECT * FROM {$table} WHERE is_active = 1 ORDER BY sort_order ASC");
-            $stmt->execute();
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-            if (!empty($rows)) {
-                CacheService::save($key, $rows, $this->defaultTTL);
-                return $rows;
+            if ($single) {
+                // Load one row
+                $stmt = $pdo->prepare("SELECT * FROM {$table} WHERE is_active = 1 LIMIT 1");
+                $stmt->execute();
+                $result = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+            } else {
+                // Load many rows
+                $stmt = $pdo->prepare("SELECT * FROM {$table} WHERE is_active = 1 ORDER BY sort_order ASC");
+                $stmt->execute();
+                $result = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
             }
 
-            return $defaultFn();
+            // Only store when DB returns valid results
+            if (!empty($result)) {
+                CacheService::save($cacheKey, $result);
+                return $result;
+            }
 
         } catch (Throwable $e) {
-            app_log("AboutModel@loadMultipleWithDefault error ({$table}): " . $e->getMessage(), "error");
-            return $defaultFn();
+            app_log("AboutModel DB error {$table}: " . $e->getMessage(), "error");
         }
+
+        /** ----------------------------------------------------
+         * C. Try loading JSON defaults
+         * ---------------------------------------------------- */
+        $path = $this->defaultPath . $jsonFile;
+
+        if (file_exists($path)) {
+            $json = json_decode(file_get_contents($path), true);
+
+            if (!empty($json)) {
+                // ALWAYS wrap JSON defaults for controller consistency
+                return [
+                    "is_default_json" => true,
+                    "data" => $json
+                ];
+            }
+        }
+
+        /** ----------------------------------------------------
+         * D. Final fallback – guaranteed non-empty
+         * ---------------------------------------------------- */
+        return $fallbackFn();
     }
 
-    // ===========================
-    // PUBLIC SECTION GETTERS
-    // ===========================
+
+    /* ============================================================
+     * PUBLIC GETTERS — each section with a clean unified call
+     * ============================================================ */
 
     public function getHero()
     {
-        return $this->loadSingleWithDefault("about_hero1", "about_hero", [$this, 'defaultHero']);
+        return $this->loadUnified("about_hero",       "about_hero",       "hero.json",       [$this, 'defaultHero'], true);
     }
 
     public function getContent()
     {
-        return $this->loadSingleWithDefault("about_content1", "about_content", [$this, 'defaultContent']);
+        return $this->loadUnified("about_content",    "about_content",    "content.json",    [$this, 'defaultContent'], true);
     }
 
     public function getSkills(): array
     {
-        return $this->loadMultipleWithDefault("about_skills1", "about_skills", [$this, 'defaultSkills']);
+        return $this->loadUnified("about_skills",     "about_skills",     "skills.json",     [$this, 'defaultSkills']);
     }
 
     public function getExperience(): array
     {
-        return $this->loadMultipleWithDefault("about_experience1", "about_experience", [$this, 'defaultExperience']);
+        return $this->loadUnified("about_experience", "about_experience", "experience.json", [$this, 'defaultExperience']);
     }
 
     public function getEducation(): array
     {
-        return $this->loadMultipleWithDefault("about_education1", "about_education", [$this, 'defaultEducation']);
+        return $this->loadUnified("about_education",  "about_education",  "education.json",  [$this, 'defaultEducation']);
     }
 
     public function getStats(): array
     {
-        return $this->loadMultipleWithDefault("about_stats1", "about_stats", [$this, 'defaultStats']);
+        return $this->loadUnified("about_stats",      "about_stats",      "stats.json",      [$this, 'defaultStats']);
     }
 
-    // ===========================
-    // DEFAULTS (guaranteed non-empty)
-    // ===========================
+    /* ============================================================
+     * FALLBACK PROVIDERS
+     * ============================================================ */
+
+    /**
+     * Returns the correct default set for a given section key.
+     * Used by safeLoad() in the controller.
+    */
+    public function fallback(string $section)
+    {
+        return match ($section) {
+            "hero"       => $this->defaultHero(),
+            "content"    => $this->defaultContent(),
+            "skills"     => $this->defaultSkills(),
+            "experience" => $this->defaultExperience(),
+            "education"  => $this->defaultEducation(),
+            "stats"      => $this->defaultStats(),
+            default      => []
+        };
+    }
+
+    /* ============================================================
+     * STATIC HARD-CODED FALLBACKS (never empty)
+     * ============================================================ */
 
     public function defaults(): array
     {
         return [
-            "title"   => "About Me",
+            "title"   => "About Me D",
             "content" => "Hi, I'm Yogesh. I build optimized, scalable and user-friendly applications."
         ];
     }
@@ -160,7 +223,8 @@ class AboutModel {
     public function defaultHero(): array
     {
         return [
-            "title" => "About",
+            "is_default" => true,
+            "title" => "About D",
             "subtitle" => "Full Stack & Android Developer passionate about modern digital experiences.",
             "animation_url" => "https://assets10.lottiefiles.com/packages/lf20_jcikwtux.json",
             "background_opacity" => 0.15,
@@ -171,7 +235,8 @@ class AboutModel {
     public function defaultContent(): array
     {
         return [
-            "greeting_title" => "Hi, I'm " . SITE_TITLE . " 👋",
+            "is_default" => true,
+            "greeting_title" => "Hi, I'm " . SITE_TITLE . " 👋 D",
             "main_description" => "I build modern web and mobile applications with a focus on performance, usability and clean architecture.",
             "secondary_description" => "I enjoy solving problems end-to-end: from design and product thinking to clean, tested code.",
             "cta_text" => "Download CV",
@@ -184,11 +249,11 @@ class AboutModel {
     public function defaultSkills(): array
     {
         return [
-            ["skill_name" => "PHP", "icon_class" => "fab fa-php", "color_class" => "text-blue-400"],
-            ["skill_name" => "MySQL", "icon_class" => "fas fa-database", "color_class" => "text-yellow-400"],
-            ["skill_name" => "JavaScript", "icon_class" => "fab fa-js", "color_class" => "text-yellow-300"],
-            ["skill_name" => "TailwindCSS", "icon_class" => "fab fa-css3-alt", "color_class" => "text-sky-400"],
-            ["skill_name" => "Android", "icon_class" => "fab fa-android", "color_class" => "text-green-400"],
+            ["is_default" => true, "skill_name" => "D PHP", "icon_class" => "fab fa-php", "color_class" => "text-blue-400"],
+            ["is_default" => true, "skill_name" => "MySQL", "icon_class" => "fas fa-database", "color_class" => "text-yellow-400"],
+            ["is_default" => true, "skill_name" => "JavaScript", "icon_class" => "fab fa-js", "color_class" => "text-yellow-300"],
+            ["is_default" => true, "skill_name" => "TailwindCSS", "icon_class" => "fab fa-css3-alt", "color_class" => "text-sky-400"],
+            ["is_default" => true, "skill_name" => "Android", "icon_class" => "fab fa-android", "color_class" => "text-green-400"],
         ];
     }
 
@@ -196,12 +261,14 @@ class AboutModel {
     {
         return [
             [
-                "title" => "Full Stack Developer",
+                "is_default" => true,
+                "title" => "D Full Stack Developer",
                 "description" => "Built responsive UIs, REST APIs and improved app performance.",
                 "company" => "Personal Projects",
                 "period" => "2022 — Present",
             ],
             [
+                "is_default" => true,
                 "title" => "Android Developer",
                 "description" => "Created performant mobile experiences and shipped production apps.",
                 "company" => "Personal Projects",
@@ -214,18 +281,21 @@ class AboutModel {
     {
         return [
             [
-                "degree" => "Bachelor of Engineering in Computer Science",
+                "is_default" => true,
+                "degree" => "D Bachelor of Engineering in Computer Science",
                 "institution" => "Pune University",
                 "period" => "2019 — 2023",
                 "description" => "Graduated with a strong foundation in algorithms, full-stack web development, and mobile technologies.",
             ],
             [
+                "is_default" => true,
                 "degree" => "Higher Secondary Education (HSC)",
                 "institution" => "Maharashtra State Board",
                 "period" => "2017 — 2019",
                 "description" => "Focused on science and mathematics with distinction.",
             ],
             [
+                "is_default" => true,
                 "degree" => "Secondary Education (SSC)",
                 "institution" => "Maharashtra State Board",
                 "period" => "2017",
@@ -237,10 +307,11 @@ class AboutModel {
     public function defaultStats(): array
     {
         return [
-            ["label" => "Projects", "value" => "12+"],
-            ["label" => "Years Experience", "value" => "3+"],
-            ["label" => "Clients", "value" => "5+"],
-            ["label" => "Open Source", "value" => "8+"],
+            
+            ["is_default" => true,"label" => "D Projects", "value" => "12+"],
+            ["is_default" => true,"label" => "Years Experience", "value" => "3+"],
+            ["is_default" => true,"label" => "Clients", "value" => "5+"],
+            ["is_default" => true,"label" => "Open Source", "value" => "8+"],
         ];
     }
 }

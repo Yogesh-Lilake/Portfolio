@@ -8,12 +8,12 @@ require_once CORE_PATH . 'App.php';
 $data = App::run("AboutController@index");
 
 // Extract sections (always non-empty due to model defaults)
-$hero       = $data["hero"];
-$content    = $data["content"];
-$skills     = $data["skills"];
-$experience = $data["experience"];
-$education  = $data["education"];
-$stats      = $data["stats"];
+$hero       = $data["hero"]["data"] ?? [];
+$content    = $data["content"]["data"] ?? [];
+$skills     = $data["skills"]["data"] ?? [];
+$experience = $data["experience"]["data"] ?? [];
+$education  = $data["education"]["data"] ?? [];
+$stats      = $data["stats"]["data"] ?? [];
 
 $page_title = "About | " . SITE_TITLE;
 $custom_css = [ABOUT_CSS];
