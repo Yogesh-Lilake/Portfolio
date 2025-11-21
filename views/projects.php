@@ -65,7 +65,7 @@ require_once LAYOUT_HEAD_FILE;
             <p class="text-gray-300 mb-4 text-sm sm:text-base leading-relaxed"><?= esc($p['description']) ?></p>
 
             <div class="flex flex-wrap gap-2">
-              <?php foreach ($techList[$p['id']] as $t): ?>
+              <?php foreach ($techList[$p['id']] ?? [] as $t): ?>
                 <span class="<?= esc($t['color_class']) ?> px-3 py-1 rounded-full text-xs font-semibold">
                   <?= esc($t['tech_name']) ?>
                 </span>

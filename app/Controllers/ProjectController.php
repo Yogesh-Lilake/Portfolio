@@ -2,14 +2,17 @@
 
 class ProjectController extends Controller
 {
-    private ProjectModel $model;
+    private ProjectModel $projects;
+
+    /** Full page cache - dynamic per query */
+    private string $cacheKey;
 
     public function __construct()
     {
         require_once ROOT_PATH . "app/Models/ProjectModel.php";
         require_once ROOT_PATH . "app/Services/CacheService.php";
 
-        $this->model = new ProjectModel();
+        $this->projects = new ProjectModel();
     }
 
     /**
@@ -17,132 +20,130 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        try{
-            // Get request inputs
-            $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-            $perPage  = 12;
-            $offset   = ($page - 1) * $perPage;
+        try {
+            /* -----------------------------------------------
+             * 0. BUILD DYNAMIC CACHE KEY PER PAGE + FILTERS
+             * ----------------------------------------------- */
+            $page     = isset($_GET["page"]) ? max(1, (int)$_GET["page"]) : 1;
+            $tech     = isset($_GET["tech"]) && $_GET["tech"] !== "" ? trim(strip_tags($_GET["tech"])) : null;
+            $featured = isset($_GET["featured"]) ? 1 : 0;
 
-            // tech — only allow safe strings
-            $tech = isset($_GET['tech']) ? trim(strip_tags($_GET['tech'])) : null;
-            if ($tech === "") $tech = null;
-
-            // featured filter
-            $featured = isset($_GET['featured']) ? true : false;
-
-            /** ---------------------------------------------------
-            *  2. CACHE KEY BASED ON PAGE + FILTERS
-            * --------------------------------------------------- */
-
-            $cacheKey = "projects_page_" . md5(json_encode([
-                    "page"     => $page,
-                    "perPage"  => $perPage,
-                    "tech"     => $tech,
-                    "featured" => $featured
+            $this->cacheKey = "projects_page_" . md5(json_encode([
+                "p" => $page,
+                "tech" => $tech,
+                "featured" => $featured
             ]));
 
-            $cached = CacheService::load($cacheKey);
-
-            if (!empty($cached) && $this->hasRealData($cached)) {
-                return $cached; // Defensive: return only if actual content exists
+            /* ---------------------------------------------------
+             * 1. FULL PAGE CACHE
+             * --------------------------------------------------- */
+            if ($cached = CacheService::load($this->cacheKey)) {
+                return $cached;
             }
 
-            /** ---------------------------------------------------
-            *  3. QUERY DATABASE
-            * --------------------------------------------------- */
-            $params = [
-                "offset"   => $offset,
-                "limit"    => $perPage,
-                "tech"     => $tech,
-                "featured" => $featured
-            ];
+            /* ---------------------------------------------------
+             * 2. Load project listing (includes pagination & filters)
+             *    This internally follows A->B->C->D
+             * --------------------------------------------------- */
+            $projectData = $this->safeLoad(
+                fn() => $this->projects->getPaginatedProjects(),
+                "projects"
+            );
 
-            // Get data — model handles DB + CacheService fallback
-            $result = $this->model->fetchActiveProjects($params);
+            /* ---------------------------------------------------
+             * 3. Load tech list (for badges) - follows A->B->C->D
+             * --------------------------------------------------- */
+            $techData = $this->safeLoad(
+                fn() => $this->projects->getAllTechStructured(),
+                "tech"
+            );
 
-            /** ---------------------------------------------------
-            *  4. VALIDATE RESULT STRUCTURE
-            * --------------------------------------------------- */
-            if (!isset($result["items"]) || !is_array($result["items"])) {
-                throw new Exception("Invalid structure returned from ProjectModel");
-            }
-
-            // Extract items + total count
-            $projects   = $result["items"];
-            $totalCount = isset($result["total"]) ? (int) $result["total"] : 0;
-            $totalPages = max(1, (int) ceil($totalCount / $perPage));
-
-            /** ---------------------------------------------------
-            *  5. GET TECH LIST FOR EACH PROJECT (SAFE LOOP)
-            * --------------------------------------------------- */
-            $techList = [];
-            foreach ($projects as $p) {
-                // Ensure ID exists
-                if (!isset($p['id'])) continue;
-
-                try {
-                    $techList[$p['id']] = $this->model->getTechList($p['id']);
-                } catch (Throwable $innerErr) {
-                    app_log("Failed loading tech list for project ID {$p['id']}: " . $innerErr->getMessage(), "warning");
-                    $techList[$p['id']] = [];
-                }
-            }
-
-            /** ---------------------------------------------------
-            *  6. PROPER FINAL DATA STRUCTURE
-            * --------------------------------------------------- */
+            /* ---------------------------------------------------
+             * 4. FINAL response (view always gets perfect data)
+             * --------------------------------------------------- */
+            // ensure shape even if fallback returned different shaped data
+            $proj = $projectData["data"];
             $final = [
-                "projects"   => $projects,
-                "techList"   => $techList,
-                "page"       => $page,
-                "totalPages" => $totalPages,
-                "perPage"    => $perPage,
-                "total"      => $totalCount,
-                "filters"    => [
-                    "tech"     => $tech,
-                    "featured" => $featured
-                ]
+                "projects"   => $proj["items"] ?? [],
+                "techList"   => $techData["data"] ?? [],
+                "page"       => $proj["page"] ?? 1,
+                "totalPages" => $proj["totalPages"] ?? 1,
+                "total"      => $proj["total"] ?? 0,
+                "filters"    => $proj["filters"] ?? ["tech" => $tech, "featured" => (bool)$featured],
             ];
 
-            /** ---------------------------------------------------
-            *  7. SAVE TO CACHE ONLY IF REAL CONTENT EXISTS
-            * --------------------------------------------------- */
-            if ($this->hasRealData($final)) {
-                CacheService::save($cacheKey, $final);
+            /* ---------------------------------------------------
+             * 5. Save CACHE only when ALL sections came from DB
+             * --------------------------------------------------- */
+            if ($this->hasRealData([
+                "projects" => $projectData,
+                "techList" => $techData
+            ])) {
+                CacheService::save($this->cacheKey, $final);
             }
 
             return $final;
+
         } catch (Throwable $e) {
-            /** ---------------------------------------------------
-            *  8. EMERGENCY FALLBACK (NO HARD FAIL)
-            * --------------------------------------------------- */
-            app_log("ProjectController@index failed: " . $e->getMessage(), "error");
+
+            app_log("ProjectController@index ERROR: " . $e->getMessage(), "error");
 
             return [
-                "projects"   => [],
-                "techList"   => [],
+                "projects"   => $this->projects->defaultProjects(),
+                "techList"   => $this->projects->defaultTechList(),
                 "page"       => 1,
                 "totalPages" => 1,
-                "perPage"    => 12,
-                "total"      => 0,
+                "total"      => count($this->projects->defaultProjects()),
                 "filters"    => [
-                    "tech"     => null,
+                    "tech" => null,
                     "featured" => false
-                ]
+                ],
             ];
         }
     }
 
-    /**
-     * Checks if there is at least some meaningful data
-     */
-    private function hasRealData(array $data): bool
+
+    /* ============================================================
+     * SAFE LOAD (same structure as AboutController)
+     * ============================================================ */
+    private function safeLoad(callable $fn, string $label): array
     {
-        foreach ($data as $section) {
-            if (!empty($section)) {
-                return true;
+        try {
+            $data = $fn();
+
+            // not an array → fallback
+            if (!is_array($data)) {
+                return ["from_db" => false, "data" => $this->projects->fallback($label)];
+            }
+
+            // JSON default marker
+            if (isset($data["is_default"]) && $data["is_default"]) {
+                return ["from_db" => false, "data" => $data];
+            }
+
+            // DB result (non-empty)
+            if (!empty($data)) {
+                return ["from_db" => true, "data" => $data];
+            }
+
+            // empty → fallback
+            return ["from_db" => false, "data" => $this->projects->fallback($label)];
+
+        } catch (Throwable $e) {
+            app_log("ProjectController safeLoad({$label}) FAILED: " . $e->getMessage(), "warning");
+            return ["from_db" => false, "data" => $this->projects->fallback($label)];
+        }
+    }
+
+
+    /** TRUE only when ALL sections were from DB */
+    private function hasRealData(array $sections): bool
+    {
+        foreach ($sections as $section) {
+            if (!isset($section["from_db"]) || $section["from_db"] !== true) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 }
