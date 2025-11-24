@@ -1,0 +1,12 @@
+[
+  {
+    "label": "from defaultPath Email",
+    "value": "yogeshlilake02@gmail.com",
+    "icon_class": "fa-solid fa-envelope"
+  },
+  {
+    "label": "Location",
+    "value": "Pune, Maharashtra, India",
+    "icon_class": "fa-solid fa-location-dot"
+  }
+]

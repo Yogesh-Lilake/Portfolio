@@ -1,0 +1,17 @@
+[
+  {
+    "platform": "GitHub",
+    "icon_class": "fab fa-github",
+    "url": "https://github.com/YogeshLilake"
+  },
+  {
+    "platform": "LinkedIn",
+    "icon_class": "fab fa-linkedin",
+    "url": "https://linkedin.com/in/yogeshlilake"
+  },
+  {
+    "platform": "LeetCode",
+    "icon_class": "fa-solid fa-code",
+    "url": "https://leetcode.com/YogeshLilake"
+  }
+]
