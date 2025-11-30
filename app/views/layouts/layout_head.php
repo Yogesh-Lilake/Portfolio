@@ -1,27 +1,30 @@
 <?php
-require_once dirname(__DIR__) . '/config/paths.php';
+/**
+ * GLOBAL <head> + auto header loader
+ */
+
+require_once dirname(__DIR__, 3) . '/config/paths.php';
 require_once CONFIG_PATH . 'config.php';
 
-// Optional dynamic page values
-$page_title  = $page_title  ?? SITE_TITLE;
-$custom_css  = $custom_css  ?? [];
-$custom_js   = $custom_js   ?? [];
-$extra_css   = $extra_css   ?? [];
-$extra_js    = $extra_js    ?? [];
-
+// Page dynamic values
+$page_title = $page_title ?? SITE_TITLE;
+$custom_css = $custom_css ?? [];
+$extra_css  = $extra_css ?? [];
+$custom_js  = $custom_js ?? [];
+$extra_js   = $extra_js ?? [];
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title><?= htmlspecialchars($page_title) ?></title>
 
-    <!-- Favicon -->
-    <link rel="icon" href="<?= FAVICON_PATH ?>" type="image/png">
+    <!-- FAVICON -->
+    <link rel="icon" type="image/png" href="<?= FAVICON_PATH ?>">
 
-    <!-- Core CSS -->
+    <!-- GLOBAL CSS + ANIMATION CSS-->
     <link rel="stylesheet" href="<?= GLOBAL_CSS ?>">
     <link rel="stylesheet" href="<?= ANIMATIONS_CSS ?>">
 
@@ -51,7 +54,8 @@ $extra_js    = $extra_js    ?? [];
 
 <body class="bg-darkbg text-color font-sans scroll-smooth min-h-screen flex flex-col">
     <div id="scroll-progress"></div>
-    
-    <?php include INCLUDES_PATH . 'header.php'; ?>
-    
+
+    <!-- AUTO HEADER -->
+    <?php include HEADER_FILE; ?>
+
     <main class="flex-grow">

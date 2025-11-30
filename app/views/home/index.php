@@ -1,11 +1,8 @@
 <?php
-require_once __DIR__ . '/../config/config.php';
-require_once INCLUDES_PATH . 'logger.php';
-require_once CORE_PATH . 'Controller.php';
-require_once CORE_PATH . 'App.php';
-
-// Run controller
-$data = App::run("HomeController@index");
+/**
+ * HOME PAGE VIEW
+ * Receives $data from HomeController
+ */
 
 // Extract data
 $skills   = $data["skills"]["data"] ?? [];
@@ -21,7 +18,6 @@ function safe($value) {
 function field($array, $key, $default = "") {
     return isset($array[$key]) ? safe($array[$key]) : $default;
 }
-
 
 $page_title = "Yogesh Portfolio | Full Stack Developer";
 $custom_css = [INDEX_CSS];
@@ -72,11 +68,12 @@ require_once LAYOUT_HEAD_FILE;
     </p>
 </section>
 
-<!-- SKILLS -->
+<!-- SKILLS SECTION -->
 <section class="py-20 px-4 sm:px-10 lg:px-20 text-center reveal-right">
     <div class="max-w-6xl mx-auto">
         <h3 class="text-3xl sm:text-4xl font-bold mb-10 text-accent">Skills</h3>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 sm:gap-6">
+
             <?php if(empty($skills)): ?>
                 <p>No skills found.</p>
             <?php else: ?>
@@ -87,6 +84,7 @@ require_once LAYOUT_HEAD_FILE;
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
+
         </div>
     </div>
 </section>
@@ -94,6 +92,7 @@ require_once LAYOUT_HEAD_FILE;
 <!-- PROJECTS -->
 <section class="py-20 px-4 sm:px-10 lg:px-20 bg-[#111827] reveal-left">
     <h2 class="text-3xl sm:text-4xl font-bold mb-12 text-center text-accent">Featured Projects</h2>
+
     <div class="grid gap-8 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 max-w-screen-xl mx-auto">
         <?php if(empty($projects)): ?>
             <p>No featured projects found.</p>
@@ -115,7 +114,7 @@ require_once LAYOUT_HEAD_FILE;
     </div>
 
     <div class="text-center mt-10">
-        <a href="projects.php" class="border border-accent text-accent px-6 py-3 rounded-full hover:bg-accent hover:text-darkbg transition">
+        <a href="<?= PROJECTS_URL ?>" class="border border-accent text-accent px-6 py-3 rounded-full hover:bg-accent hover:text-darkbg transition">
             See All Projects
         </a>
     </div>

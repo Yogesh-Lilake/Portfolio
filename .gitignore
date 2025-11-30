@@ -2,6 +2,7 @@
 # SENSITIVE FILES (DO NOT UPLOAD)
 # ==========================
 config/config.php
+.env
 
 # ==========================
 # LOGS
@@ -9,13 +10,25 @@ config/config.php
 logs/
 *.log
 
+# ==========================
+# CACHE / TEMP STORAGE
+# ==========================
+storage/cache/
+*.cache
+*.tmp
+
 # # ==========================
-# # SYSTEM / CACHE / TEMP
+# # COMPOSER / NODE MODULES
 # # ==========================
 vendor/
 node_modules/
-*.cache
-*.tmp
+
+
+# ==========================
+# FRONTEND BUILD OUTPUT (if any)
+# ==========================
+dist/
+build/
 
 # # ==========================
 # # OS FILES

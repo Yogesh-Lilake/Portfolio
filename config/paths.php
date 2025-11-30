@@ -1,84 +1,125 @@
 <?php
 /**
  * PATHS.PHP
- * Handles ONLY paths + URL generation.
- * Zero business logic, zero secrets.
+ * Absolute filesystem paths + URL paths.
+ * Works on localhost + InfinityFree perfectly.
  */
 
-// AUTO-DETECT PROTOCOl
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+/* ---------------------------------------------
+   1. ROOT PATH (ABSOLUTE SERVER FILESYSTEM PATH)
+---------------------------------------------- */
+define('ROOT_PATH', str_replace('\\', '/', realpath(__DIR__ . '/../')) . '/');
 
-// BASE URL GENERATION
-$host = $_SERVER['HTTP_HOST'];
+/* ---------------------------------------------
+   2. PUBLIC PATH (PUBLIC DOCUMENT ROOT)
+---------------------------------------------- */
+define('PUBLIC_PATH', ROOT_PATH . 'public/');
 
-// ---------------------------------------------------------
-// ROOT DIRECTORY (Absolute server path)
-// ---------------------------------------------------------
-$root = rtrim(str_replace('\\', '/', realpath(__DIR__ . '/../')) . '/');
-define('ROOT_PATH', $root);
+/* ---------------------------------------------
+   3. APP PATHS
+---------------------------------------------- */
+define('APP_PATH', ROOT_PATH . 'app/');
+define('CORE_PATH', APP_PATH . 'core/');
+define('CONTROLLERS_PATH', APP_PATH . 'controllers/');
+define('MODELS_PATH', APP_PATH . 'models/');
+define('VIEWS_PATH', APP_PATH . 'views/');
+define('SERVICES_PATH', APP_PATH . 'services/');
+define('HELPERS_PATH', APP_PATH . 'helpers/');
 
-// -------------------------------------
-// DOCUMENT ROOT (public folder)
-// -------------------------------------
-$docRoot = rtrim(str_replace('\\', '/', realpath($_SERVER['DOCUMENT_ROOT'])), '/');
+/* VIEWS SUBFOLDERS */
+define('LAYOUTS_PATH', VIEWS_PATH . 'layouts/');
+define('COMPONENTS_PATH', VIEWS_PATH . 'components/');
+define('PAGES_PATH', VIEWS_PATH . 'pages/');
+define('HOME_PATH', VIEWS_PATH . 'home/');
 
-// ---------------------------------------------------------
-// BASE URL (auto-detected, works everywhere)
-// ---------------------------------------------------------
-$base_url = $protocol . $host . str_replace($docRoot, '', ROOT_PATH);
-
-// Normalize trailing slashes
-define('BASE_URL', rtrim($base_url, '/') . '/');
-
-// ====================================================
-// SERVER PATH CONSTANTS (ABSOLUTE FILESYSTEM PATHS)
-// ====================================================
+/* ---------------------------------------------
+   4. CONFIG FOLDER
+---------------------------------------------- */
 define('CONFIG_PATH', ROOT_PATH . 'config/');
-define('CORE_PATH', ROOT_PATH . 'core/');
-define('LOGS_PATH', ROOT_PATH . 'logs/');
-define('INCLUDES_PATH', ROOT_PATH . 'includes/');
-define('ASSETS_PATH', ROOT_PATH . 'assets/');
-define('VIEWS_PATH', ROOT_PATH . 'views/');
-define('UPLOADS_PATH', ROOT_PATH . 'uploads/');
 
-// Core files
-define('CONFIG_FILE', CONFIG_PATH . 'config.php');
-define('PATHS_FILE', CONFIG_PATH . 'paths.php');
-define('DB_CONNECTION_FILE', CORE_PATH . 'db_connection.php');
-define('HEADER_DATA_FILE', CORE_PATH . 'HeaderData.php');
-define('FOOTER_DATA_FILE', CORE_PATH . 'FooterData.php');
+/* ---------------------------------------------
+   5. INCLUDES FOLDER
+---------------------------------------------- */
+define('INCLUDES_PATH', ROOT_PATH . 'includes/');
+
+/* ---------------------------------------------
+   6. ROUTES FOLDER
+---------------------------------------------- */
+define('ROUTES_PATH', ROOT_PATH . 'routes/');
+
+/* ---------------------------------------------
+   7. LOGS FOLDER
+---------------------------------------------- */
+define('LOGS_PATH', ROOT_PATH . 'logs/');
 define('LOG_FILE', LOGS_PATH . 'app.log');
 
-// Layout includes
-define('LAYOUT_HEAD_FILE', INCLUDES_PATH . 'layout_head.php');
-define('LAYOUT_FOOT_FILE', INCLUDES_PATH . 'layout_foot.php');
-define('FOOTER_FILE', INCLUDES_PATH . 'footer.php');
-define('HEADER_FILE', INCLUDES_PATH . 'header.php');
-define('LOGGER_PATH', INCLUDES_PATH . 'logger.php');
+define('STORAGE_PATH', ROOT_PATH . 'storage/');
 
+define('CACHE_PATH', STORAGE_PATH . 'cache/');
 
-// ====================================================
-// PUBLIC URL CONSTANTS (FOR USE IN HTML)
-// ====================================================
+/* ---------------------------------------------
+   8. ASSETS (FILESYSTEM PATHS)
+---------------------------------------------- */
+define('ASSETS_PATH', PUBLIC_PATH . 'assets/');
+define('CSS_PATH', ASSETS_PATH . 'css/');
+define('JS_PATH', ASSETS_PATH . 'js/');
+define('IMG_PATH', ASSETS_PATH . 'images/');
+define('RESUME_PATH', ASSETS_PATH . 'resume/');
+
+define('ABOUT_VIEW_FILE', PAGES_PATH . 'about.php');
+define('PROJECT_VIEW_FILE', PAGES_PATH . 'projects.php');
+define('NOTES_VIEW_FILE', PAGES_PATH . 'notes.php');
+define('CONTACT_VIEW_FILE', PAGES_PATH . 'contact.php');
+
+/* ---------------------------------------------
+   9. URL BASE DETECTION (WORKS LOCAL + LIVE)
+---------------------------------------------- */
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    ? 'https://' : 'http://';
+
+$host = $_SERVER['HTTP_HOST'];
+
+/* LOCALHOST CASE (custom folder name allowed) */
+if ($host === 'localhost') {
+    // Change "Portfolio" to your actual localhost folder name
+    define('BASE_URL', $protocol . $host . '/Portfolio/public/');
+} else {
+    // InfinityFree & live domain use root public folder
+    define('BASE_URL', $protocol . $host . '/');
+}
+
+/* ---------------------------------------------
+   10. ASSETS (URL PATHS)
+---------------------------------------------- */
 define('ASSETS_URL', BASE_URL . 'assets/');
 define('CSS_URL', ASSETS_URL . 'css/');
 define('JS_URL', ASSETS_URL . 'js/');
 define('IMG_URL', ASSETS_URL . 'images/');
-define('ICON_URL', ASSETS_URL . 'icons/');
+define('RESUME_URL', ASSETS_URL . 'resume/');
 
-// ====================================================
-// PAGE ROUTES
-// ====================================================
-define('VIEWS_URL', BASE_URL . 'views/');
-define('HOME_URL', VIEWS_URL . 'index.php');
-define('ABOUT_URL', VIEWS_URL . 'about.php');
-define('PROJECTS_URL', VIEWS_URL . 'projects.php');
-define('NOTES_URL', VIEWS_URL . 'notes.php');
-define('CONTACT_URL', VIEWS_URL . 'contact.php');
+define('DB_CONNECTION_FILE', CORE_PATH . 'db_connection.php');
+define('LOGGER_PATH', HELPERS_PATH . 'logger.php');
 
-// ---------------------------------------------------------
-// SITE GLOBAL CONSTANTS
-// ---------------------------------------------------------
+/* ---------------------------------------------
+   11. PAGE ROUTES (URL)
+---------------------------------------------- */
+define('HOME_URL', BASE_URL . 'index.php');
+define('ABOUT_URL', BASE_URL . 'about.php');
+define('PROJECTS_URL', BASE_URL . 'projects.php');
+define('NOTES_URL', BASE_URL . 'notes.php');
+define('CONTACT_URL', BASE_URL . 'contact.php');
+
+/* ---------------------------------------------
+   12. LAYOUT FILES
+---------------------------------------------- */
+define('LAYOUT_HEAD_FILE', LAYOUTS_PATH . 'layout_head.php');
+define('LAYOUT_FOOT_FILE', LAYOUTS_PATH . 'layout_foot.php');
+define('HEADER_FILE', LAYOUTS_PATH . 'header.php');
+define('FOOTER_FILE', LAYOUTS_PATH . 'footer.php');
+
+/* ---------------------------------------------
+   13. OTHER CONSTANTS
+---------------------------------------------- */
 define('SITE_TITLE', 'Yogesh Lilake');
 define('SITE_LOGO', IMG_URL . 'logo.png');
 define('FAVICON_PATH', IMG_URL . 'favicon.png');
@@ -87,7 +128,7 @@ define('CTA_LINK', ASSETS_URL . 'Yogesh_Lilake_Resume.pdf');
 define('ACCENT_COLOR', '#ff5a5a');
 
 // =============================
-// EXTERNAL LIBRARY URLs
+// EXTERNAL LIBRARY URLs (Tailwind, Font Awesome, Lottie)
 // =============================
 define('TAILWIND_CDN', 'https://cdn.tailwindcss.com');
 define('AOS_CSS', 'https://unpkg.com/aos@2.3.4/dist/aos.css');

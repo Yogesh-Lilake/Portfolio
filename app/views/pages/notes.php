@@ -1,11 +1,4 @@
 <?php
-require_once __DIR__ . '/../config/config.php';
-require_once INCLUDES_PATH . 'logger.php';
-require_once CORE_PATH . 'Controller.php';
-require_once CORE_PATH . 'App.php';
-
-// Controller returns all required data with DB → Cache → Defaults
-$data = App::run("NotesController@index");
 
 $notes        = $data["notes"]["data"] ?? [];
 $categories   = $data["categories"]["data"] ?? [];

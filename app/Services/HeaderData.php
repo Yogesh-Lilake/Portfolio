@@ -1,4 +1,5 @@
 <?php
+
 class HeaderData {
 
     private $pdo;
@@ -14,6 +15,7 @@ class HeaderData {
      */
     public function get()
     {
+        // --- FALLBACK HEADER VALUES ---
         $header = [
             'site_title'   => SITE_TITLE,
             'logo_path'    => SITE_LOGO,
@@ -22,6 +24,7 @@ class HeaderData {
             'accent_color' => ACCENT_COLOR,
         ];
 
+        // --- FALLBACK NAVIGATION ---
         $nav_links = [
             ['label' => 'Home',    'url' => HOME_URL],
             ['label' => 'About',   'url' => ABOUT_URL],
@@ -32,6 +35,7 @@ class HeaderData {
 
         if (!$this->pdo) return ['header' => $header, 'nav' => $nav_links];
 
+        // --- FETCH HEADER SETTINGS FROM DB ---
         try {
             $stmt = $this->pdo->query("SELECT * FROM header_settings LIMIT 1");
             if ($stmt && $row = $stmt->fetch()) {
@@ -39,6 +43,7 @@ class HeaderData {
             }
         } catch (Exception $e) { /* ignore, use fallback */ }
 
+        // --- FETCH NAVIGATION LINKS FROM DB ---
         try {
             $nav = $this->pdo->query("SELECT label, url 
                                       FROM navigation_links 
@@ -46,7 +51,10 @@ class HeaderData {
                                       ORDER BY order_no ASC");
 
             if ($nav) {
-                $nav_links = $nav->fetchAll();
+                $dbNav = $nav->fetchAll();
+                if (!empty($dbNav)) {
+                    $nav_links = $dbNav;
+                }
             }
         } catch (Exception $e) { /* ignore, use fallback */ }
 
@@ -56,4 +64,3 @@ class HeaderData {
         ];
     }
 }
-?>
