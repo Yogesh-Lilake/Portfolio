@@ -50,7 +50,7 @@ require_once LAYOUT_HEAD_FILE;
             class="bg-accent text-darkbg px-6 py-3 rounded-full font-semibold hover:bg-red-600 transition">
             View Projects
         </a>
-        <a href="<?= safe($home['cv_link']) ?>" 
+        <a href="download-cv.php" 
             class="border border-accent text-accent px-6 py-3 rounded-full font-semibold hover:bg-accent hover:text-darkbg transition">
             Download CV
         </a>
