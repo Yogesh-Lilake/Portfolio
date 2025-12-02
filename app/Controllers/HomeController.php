@@ -13,12 +13,14 @@ class HomeController extends Controller
     public function __construct()
     {
         // Load all models
-        require_once ROOT_PATH . "app/Models/HomeModel.php";
-        require_once ROOT_PATH . "app/Models/AboutModel.php";
-        require_once ROOT_PATH . "app/Models/SkillModel.php";
-        require_once ROOT_PATH . "app/Models/ProjectModel.php";
-        require_once ROOT_PATH . "app/Models/ContactModel.php";
-        require_once ROOT_PATH . "app/Services/CacheService.php";
+        require_once HOME_MODEL_FILE;
+        require_once ABOUT_MODEL_FILE;
+        require_once SKILL_MODEL_FILE;
+        require_once PROJECT_MODEL_FILE;
+        require_once CONTACT_MODEL_FILE;
+
+        // SERVICES
+        require_once CACHESERVICE_FILE;
 
         $this->home     = new HomeModel();
         $this->about    = new AboutModel();
@@ -150,28 +152,29 @@ class HomeController extends Controller
         return match ($section) {
 
             "home" => [
-                "hero_heading"       => "Hi, I’m " . SITE_TITLE . " 👋",
-                "hero_subheading"    => "Full Stack & Android Developer | Turning ideas into scalable digital products.",
-                "hero_description"   => "I build fast, modern, scalable applications using PHP, MySQL, JavaScript, TailwindCSS, and Android.",
-                "projects_link"      => "project.php",
-                "cv_link"            => "assets/cv/Yogesh-CV.pdf",
-                "animation_url"    => "https://assets10.lottiefiles.com/packages/lf20_kyu7xb1v.json",
-                "background_image"   => IMG_URL . "default-hero-bg.jpg",
-                "cta_projects"       => "View Projects",
-                "cta_contact"        => "Contact Me",
-                "is_active"        => true
+                "hero_heading"        => "Welcome to my Portfolio",
+                "hero_subheading"     => "Full Stack Developer",
+                "hero_description"  => "Building applications with clean architecture and performance in mind.",
+                "background_image"  => IMG_URL . "default-hero-bg.jpg",
+                "background_lottie" => "https://assets10.lottiefiles.com/packages/lf20_q5pk6p1k.json",
+                "cta_primary_text"  => "View Projects",
+                "cta_primary_link"  => "projects.php",
+                "cta_secondary_text"=> "Download CV",
+                "cta_secondary_link"=> "download-cv.php",
+                "cv_file_path"      => "downloads/Yogesh_Lilake_Resume.pdf",
+                "is_active"         => 1
             ],
 
             "about" => [
-                "title"   => "About Me",
-                "content" => "Hi, I'm Yogesh. I build optimized, scalable and user-friendly applications.",
+                "title" => "About Me",
+                "content" => "Hi, I'm Yogesh — Full Stack Developer specializing in scalable systems."
             ],
-
+            
             "contact" => [
-                "title"       => "Contact Me",
-                "subtitle"    => "You can reach me anytime.",
-                "button_text" => "Email Us",
-                "button_link" => "mailto:contact@example.com",
+                "title" => "Contact",
+                "subtitle" => "Let's build something amazing.",
+                "button_text" => "Email Me",
+                "button_link" => "mailto:contact@example.com"
             ],
 
             default => []

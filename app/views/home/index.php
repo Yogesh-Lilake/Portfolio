@@ -28,10 +28,10 @@ require_once LAYOUT_HEAD_FILE;
 
 <!-- HERO SECTION -->
 <section class="text-center py-24 sm:py-28 relative overflow-hidden parallax-bg"
-    style="background-image:url('<?= safe($home['background_image']) ?>')">
+    style="background-image:url('<?= field($home, 'background_image') ?>')">
     
     <lottie-player 
-        src="https://assets10.lottiefiles.com/packages/lf20_jcikwtux.json"
+        src="<?= field($home, 'background_lottie') ?>"
         background="transparent"
         speed="1" loop autoplay
         style="position:absolute; inset:0; opacity:0.15; z-index:-1;">
@@ -42,17 +42,22 @@ require_once LAYOUT_HEAD_FILE;
     </h1>
 
     <p class="text-base sm:text-lg md:text-xl text-gray-300 mb-8 reveal max-w-2xl mx-auto">
-        <?= safe($home['hero_subheading']) ?>
+        <?= field($home, 'hero_subheading') ?>
+    </p>
+
+    <p class="text-gray-400 max-w-2xl mx-auto mb-10 reveal">
+        <?= $home['hero_description'] ?? '' ?>
     </p>
 
     <div class="flex flex-wrap justify-center gap-4 reveal">
-        <a href="<?= safe($home['projects_link']) ?>" 
+        <a href="<?= field($home, 'cta_primary_link') ?>"
             class="bg-accent text-darkbg px-6 py-3 rounded-full font-semibold hover:bg-red-600 transition">
-            View Projects
+            <?= field($home, 'cta_primary_text') ?>
         </a>
-        <a href="download-cv.php" 
+
+        <a href="<?= field($home, 'cta_secondary_link') ?>"
             class="border border-accent text-accent px-6 py-3 rounded-full font-semibold hover:bg-accent hover:text-darkbg transition">
-            Download CV
+            <?= field($home, 'cta_secondary_text') ?>
         </a>
     </div>
 </section>

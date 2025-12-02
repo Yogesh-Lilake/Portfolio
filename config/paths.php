@@ -22,9 +22,25 @@ define('APP_PATH', ROOT_PATH . 'app/');
 define('CORE_PATH', APP_PATH . 'core/');
 define('CONTROLLERS_PATH', APP_PATH . 'controllers/');
 define('MODELS_PATH', APP_PATH . 'models/');
+define('RESOURCES_PATH', APP_PATH . 'resources/');
 define('VIEWS_PATH', APP_PATH . 'views/');
 define('SERVICES_PATH', APP_PATH . 'services/');
 define('HELPERS_PATH', APP_PATH . 'helpers/');
+
+define('APP_FILE', CORE_PATH . 'app.php');
+define('CONTROLLER_FILE', CORE_PATH . 'Controller.php');
+define('ERROR_HANDLER_FILE', CORE_PATH . 'ErrorHandler.php');
+
+define('HOME_MODEL_FILE', MODELS_PATH . 'HomeModel.php');
+define('ABOUT_MODEL_FILE', MODELS_PATH . 'AboutModel.php');
+define('SKILL_MODEL_FILE', MODELS_PATH . 'SkillModel.php');
+define('PROJECT_MODEL_FILE', MODELS_PATH . 'ProjectModel.php');
+define('CONTACT_MODEL_FILE', MODELS_PATH . 'ContactModel.php');
+define('NOTE_MODEL_FILE', MODELS_PATH . 'NoteModel.php');
+
+define('DEFAULTS_PATH', RESOURCES_PATH . 'defaults/');
+define('HOME_DEFAULTS_PATH', DEFAULTS_PATH . 'home/');
+define('HOME_DEFAULTS_FILE', HOME_DEFAULTS_PATH . 'home.json');
 
 /* VIEWS SUBFOLDERS */
 define('LAYOUTS_PATH', VIEWS_PATH . 'layouts/');
@@ -32,10 +48,16 @@ define('COMPONENTS_PATH', VIEWS_PATH . 'components/');
 define('PAGES_PATH', VIEWS_PATH . 'pages/');
 define('HOME_PATH', VIEWS_PATH . 'home/');
 
+define('HOME_VIEW_FILE', HOME_PATH . 'index.php');
+
+define('CACHESERVICE_FILE', SERVICES_PATH . 'CacheService.php');
+
 /* ---------------------------------------------
    4. CONFIG FOLDER
 ---------------------------------------------- */
 define('CONFIG_PATH', ROOT_PATH . 'config/');
+
+define('CONFIG_FILE', CONFIG_PATH . 'config.php');
 
 /* ---------------------------------------------
    5. INCLUDES FOLDER

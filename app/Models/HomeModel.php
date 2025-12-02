@@ -18,10 +18,10 @@ class HomeModel
 
     public function __construct()
     {
-        require_once ROOT_PATH . "app/Services/CacheService.php";
+        require_once CACHESERVICE_FILE;
 
         // Path to /resources/defaults/home.json
-        $this->defaultPath = ROOT_PATH . "app/resources/defaults/home/home.json";
+        $this->defaultPath = HOME_DEFAULTS_FILE;
     }
 
 
@@ -42,9 +42,10 @@ class HomeModel
             $pdo = DB::getInstance()->pdo();
             // Actual table name `home_section`
             $stmt = $pdo->prepare("
-                SELECT * 
+                SELECT 
+                    *
                 FROM home_section
-                WHERE is_active = 1 
+                WHERE is_active = 1
                 LIMIT 1
             ");
             $stmt->execute();
@@ -81,9 +82,7 @@ class HomeModel
         /** C. Try default JSON */
         if (file_exists($this->defaultPath)) {
             $json = json_decode(file_get_contents($this->defaultPath), true);
-            if (!empty($json)) {
-                return $json; // DO NOT CACHE THIS
-            }
+            if (!empty($json)) return $json;
         }
 
         /** D. Hard-coded fallback */
@@ -98,16 +97,18 @@ class HomeModel
     public function defaultHome(): array
     {
         return [
-            "hero_heading"       => "Hi, I’m " . SITE_TITLE . " 👋",
-            "hero_subheading"    => "Full Stack & Android Developer | Turning ideas into scalable digital products.",
-            "projects_link"    => "projects.php",
-            "cv_link"          => "assets/cv/Yogesh-CV.pdf",
-            "hero_description" => "I build fast, modern, scalable applications using PHP, MySQL, JavaScript, TailwindCSS, and Android.",
-            "cta_projects"     => "View Projects",
-            "cta_contact"      => "Contact Me",
-            "animation_url"    => "https://assets10.lottiefiles.com/packages/lf20_kyu7xb1v.json",
-            "background_image" => IMG_URL . "default-hero-bg.jpg",
-            "is_active"        => true
+            "hero_heading"        => "Welcome to My Portfolio",
+            "hero_subheading"     => "Full Stack Developer",
+            "hero_description"  => "I build scalable and modern applications.",
+            "background_image"  => IMG_URL . "default-hero.jpg",
+            "background_lottie" => "https://assets10.lottiefiles.com/packages/lf20_kyu7xb1v.json",
+            "profile_image"     => "assets/images/profile.jpg",
+            "cta_primary_text"  => "View Projects",
+            "cta_primary_link"  => "/projects",
+            "cta_secondary_text"=> "Download CV",
+            "cta_secondary_link"=> "/download-cv.php",
+            "cv_file_path"      => "downloads/Yogesh_Lilake_Resume.pdf",
+            "is_active"         => 1
         ];
     }
 }
