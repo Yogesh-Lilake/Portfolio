@@ -19,6 +19,7 @@ define('PUBLIC_PATH', ROOT_PATH . 'public/');
    3. APP PATHS
 ---------------------------------------------- */
 define('APP_PATH', ROOT_PATH . 'app/');
+
 define('CORE_PATH', APP_PATH . 'core/');
 define('CONTROLLERS_PATH', APP_PATH . 'controllers/');
 define('MODELS_PATH', APP_PATH . 'models/');
@@ -27,9 +28,20 @@ define('VIEWS_PATH', APP_PATH . 'views/');
 define('SERVICES_PATH', APP_PATH . 'services/');
 define('HELPERS_PATH', APP_PATH . 'helpers/');
 
+
+
 define('APP_FILE', CORE_PATH . 'app.php');
 define('CONTROLLER_FILE', CORE_PATH . 'Controller.php');
+define('DB_CONNECTION_FILE', CORE_PATH . 'db_connection.php');
 define('ERROR_HANDLER_FILE', CORE_PATH . 'ErrorHandler.php');
+
+
+define('HOME_CONTROLLER_FILE', CONTROLLERS_PATH . 'HomeController.php');
+define('ABOUT_CONTROLLER_FILE', CONTROLLERS_PATH . 'AboutController.php');
+define('PROJECT_CONTROLLER_FILE', CONTROLLERS_PATH . 'ProjectController.php');
+define('NOTE_CONTROLLER_FILE', CONTROLLERS_PATH . 'NotesController.php');
+define('CONTACT_CONTROLLER_FILE', CONTROLLERS_PATH . 'ContactController.php');
+
 
 define('HOME_MODEL_FILE', MODELS_PATH . 'HomeModel.php');
 define('ABOUT_MODEL_FILE', MODELS_PATH . 'AboutModel.php');
@@ -38,19 +50,74 @@ define('PROJECT_MODEL_FILE', MODELS_PATH . 'ProjectModel.php');
 define('CONTACT_MODEL_FILE', MODELS_PATH . 'ContactModel.php');
 define('NOTE_MODEL_FILE', MODELS_PATH . 'NoteModel.php');
 
+/* RESOURCES SUBFOLDERS */
 define('DEFAULTS_PATH', RESOURCES_PATH . 'defaults/');
+
+/* RESOURCES DEFAULTS SUBFOLDERS & EACH FOLDER FILES*/
 define('HOME_DEFAULTS_PATH', DEFAULTS_PATH . 'home/');
-define('HOME_DEFAULTS_FILE', HOME_DEFAULTS_PATH . 'home.json');
+define('HOME_DEFAULT_FILE', HOME_DEFAULTS_PATH . 'home.json');
+define('HOME_CONTACT_DEFAULT_FILE', HOME_DEFAULTS_PATH . 'contact.json');
+define('HOME_ABOUT_DEFAULT_FILE', HOME_DEFAULTS_PATH . 'about.json');
+define('HOME_PROJECTS_DEFAULT_FILE', HOME_DEFAULTS_PATH . 'projects.json');
+define('HOME_SKILLS_DEFAULT_FILE', HOME_DEFAULTS_PATH . 'skills.json');
 
-/* VIEWS SUBFOLDERS */
-define('LAYOUTS_PATH', VIEWS_PATH . 'layouts/');
-define('COMPONENTS_PATH', VIEWS_PATH . 'components/');
-define('PAGES_PATH', VIEWS_PATH . 'pages/');
-define('HOME_PATH', VIEWS_PATH . 'home/');
+define('ABOUT_DEFAULTS_PATH', DEFAULTS_PATH . 'about/');
+define('ABOUT_HERO_DEFAULT_FILE', ABOUT_DEFAULTS_PATH . 'hero.json');
+define('ABOUT_CONTENT_DEFAULT_FILE', ABOUT_DEFAULTS_PATH . 'content.json');
+define('ABOUT_EDUCATION_DEFAULT_FILE', ABOUT_DEFAULTS_PATH . 'education.json');
+define('ABOUT_EXPERIENCE_DEFAULT_FILE', ABOUT_DEFAULTS_PATH . 'experience.json');
+define('ABOUT_SKILLS_DEFAULT_FILE', ABOUT_DEFAULTS_PATH . 'skills.json');
+define('ABOUT_STATS_DEFAULT_FILE', ABOUT_DEFAULTS_PATH . 'stats.json');
 
-define('HOME_VIEW_FILE', HOME_PATH . 'index.php');
+define('PROJECTS_DEFAULTS_PATH', DEFAULTS_PATH . 'projects/');
+define('PROJECTS_DEFAULT_FILE', PROJECTS_DEFAULTS_PATH . 'projects.json');
+define('PROJECTS_FEATURED_DEFAULT_FILE', PROJECTS_DEFAULTS_PATH . 'featured.json');
+define('PROJECTS_TECHLIST_DEFAULT_FILE', PROJECTS_DEFAULTS_PATH . 'tech_list.json');
+
+define('NOTES_DEFAULTS_PATH', DEFAULTS_PATH . 'notes/');
+define('NOTES_DEFAULT_FILE', NOTES_DEFAULTS_PATH . 'notes.json');
+define('NOTES_CATEGORIES_DEFAULT_FILE', NOTES_DEFAULTS_PATH . 'categories.json');
+define('NOTES_PINNED_DEFAULT_FILE', NOTES_DEFAULTS_PATH . 'pinned.json');
+define('NOTES_TAGS_DEFAULT_FILE', NOTES_DEFAULTS_PATH . 'tags.json');
+
+define('CONTACT_DEFAULTS_PATH', DEFAULTS_PATH . 'contact/');
+define('CONTACT_HERO_DEFAULT_FILE', CONTACT_DEFAULTS_PATH . 'contact_hero.json');
+define('CONTACT_INFO_DEFAULT_FILE', CONTACT_DEFAULTS_PATH . 'contact_info.json');
+define('CONTACT_MAP_DEFAULT_FILE', CONTACT_DEFAULTS_PATH . 'contact_map.json');
+define('CONTACT_SOCIALS_DEFAULT_FILE', CONTACT_DEFAULTS_PATH . 'contact_socials.json');
+define('CONTACT_TOAST_DEFAULT_FILE', CONTACT_DEFAULTS_PATH . 'contact_toast.json');
+
+
 
 define('CACHESERVICE_FILE', SERVICES_PATH . 'CacheService.php');
+define('FOOTERDATA_FILE', SERVICES_PATH . 'FooterData.php');
+define('HEADERDATA_FILE', SERVICES_PATH . 'HeaderData.php');
+define('MAILSERVICE_FILE', SERVICES_PATH . 'MailService.php');
+
+/* VIEWS SUBFOLDERS & EACH FOLDER FILES */
+define('LAYOUTS_PATH', VIEWS_PATH . 'layouts/');
+define('LAYOUT_HEAD_FILE', LAYOUTS_PATH . 'layout_head.php');
+define('LAYOUT_FOOT_FILE', LAYOUTS_PATH . 'layout_foot.php');
+define('HEADER_FILE', LAYOUTS_PATH . 'header.php');
+define('FOOTER_FILE', LAYOUTS_PATH . 'footer.php');
+
+define('COMPONENTS_PATH', VIEWS_PATH . 'components/');
+
+define('PAGES_PATH', VIEWS_PATH . 'pages/');
+define('ABOUT_VIEW_FILE', PAGES_PATH . 'about.php');
+define('PROJECT_VIEW_FILE', PAGES_PATH . 'projects.php');
+define('NOTES_VIEW_FILE', PAGES_PATH . 'notes.php');
+define('CONTACT_VIEW_FILE', PAGES_PATH . 'contact.php');
+
+define('HOME_PATH', VIEWS_PATH . 'home/');
+define('HOME_VIEW_FILE', HOME_PATH . 'index.php');
+
+
+define('LOGGER_FILE', HELPERS_PATH . 'logger.php');
+define('HELPERS_FILE', HELPERS_PATH . 'helpers.php');
+define('SANITIZER_FILE', HELPERS_PATH . 'sanitizer.php');
+define('VIEW_HELPERS_FILE', HELPERS_PATH . 'view_helpers.php');
+
 
 /* ---------------------------------------------
    4. CONFIG FOLDER
@@ -68,12 +135,14 @@ define('INCLUDES_PATH', ROOT_PATH . 'includes/');
    6. ROUTES FOLDER
 ---------------------------------------------- */
 define('ROUTES_PATH', ROOT_PATH . 'routes/');
+define('WEB_FILE', ROUTES_PATH . 'web.php');
 
 /* ---------------------------------------------
    7. LOGS FOLDER
 ---------------------------------------------- */
 define('LOGS_PATH', ROOT_PATH . 'logs/');
-define('LOG_FILE', LOGS_PATH . 'app.log');
+define('APP_LOG_FILE', LOGS_PATH . 'app.log');
+define('CV_LOG_FILE', LOGS_PATH . 'cv.log');
 
 define('STORAGE_PATH', ROOT_PATH . 'storage/');
 
@@ -88,10 +157,6 @@ define('JS_PATH', ASSETS_PATH . 'js/');
 define('IMG_PATH', ASSETS_PATH . 'images/');
 define('RESUME_PATH', ASSETS_PATH . 'resume/');
 
-define('ABOUT_VIEW_FILE', PAGES_PATH . 'about.php');
-define('PROJECT_VIEW_FILE', PAGES_PATH . 'projects.php');
-define('NOTES_VIEW_FILE', PAGES_PATH . 'notes.php');
-define('CONTACT_VIEW_FILE', PAGES_PATH . 'contact.php');
 
 /* ---------------------------------------------
    9. URL BASE DETECTION (WORKS LOCAL + LIVE)
@@ -117,10 +182,10 @@ define('ASSETS_URL', BASE_URL . 'assets/');
 define('CSS_URL', ASSETS_URL . 'css/');
 define('JS_URL', ASSETS_URL . 'js/');
 define('IMG_URL', ASSETS_URL . 'images/');
-define('RESUME_URL', ASSETS_URL . 'resume/');
+define('PROJECT_URL', ASSETS_URL . 'projects/');
 
-define('DB_CONNECTION_FILE', CORE_PATH . 'db_connection.php');
-define('LOGGER_PATH', HELPERS_PATH . 'logger.php');
+define('DOWNLOADS_PATH', BASE_URL . 'downloads');
+define('RESUME_URL', DOWNLOADS_PATH . 'Yogesh_Lilake_Resume.pdf');
 
 /* ---------------------------------------------
    11. PAGE ROUTES (URL)
@@ -131,13 +196,9 @@ define('PROJECTS_URL', BASE_URL . 'projects.php');
 define('NOTES_URL', BASE_URL . 'notes.php');
 define('CONTACT_URL', BASE_URL . 'contact.php');
 
-/* ---------------------------------------------
-   12. LAYOUT FILES
----------------------------------------------- */
-define('LAYOUT_HEAD_FILE', LAYOUTS_PATH . 'layout_head.php');
-define('LAYOUT_FOOT_FILE', LAYOUTS_PATH . 'layout_foot.php');
-define('HEADER_FILE', LAYOUTS_PATH . 'header.php');
-define('FOOTER_FILE', LAYOUTS_PATH . 'footer.php');
+
+define('DOWNLOADS_CV_URL', BASE_URL . 'download-cv.php');
+
 
 /* ---------------------------------------------
    13. OTHER CONSTANTS
@@ -175,7 +236,6 @@ define('HEADER_CSS', CSS_URL . 'header.css');
 define('FOOTER_CSS', CSS_URL . 'footer.css');
 define('INDEX_CSS', CSS_URL . 'index.css');
 define('ABOUT_CSS', CSS_URL . 'about.css');
-define('PROJECTS_CSS', CSS_URL . 'projects.css');
 define('NOTES_CSS', CSS_URL . 'notes.css');
 define('CONTACT_CSS', CSS_URL . 'contact.css');
 

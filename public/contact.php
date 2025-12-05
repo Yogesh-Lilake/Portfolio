@@ -7,7 +7,7 @@ require_once CORE_PATH . 'App.php';
 require_once CORE_PATH . 'Controller.php';
 
 // Logger + Error Handler
-require_once LOGGER_PATH;
+require_once LOGGER_FILE;
 require_once CORE_PATH . 'ErrorHandler.php';
 
 $data = App::run("ContactController@index");

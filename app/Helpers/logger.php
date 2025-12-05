@@ -4,8 +4,8 @@
  * Safe, concurrent, auto-create folders, rotate logs, JSON support.
  */
 
-if (!defined('LOG_FILE')) {
-    die("LOG_FILE not defined. Check paths.php configuration.");
+if (!defined('APP_LOG_FILE')) {
+    die("APP_LOG_FILE not defined. Check paths.php configuration.");
 }
 
 /**
@@ -17,7 +17,7 @@ if (!defined('LOG_FILE')) {
  */
 function app_log(string $message, string $level = 'info', array $context = []): void
 {
-    $logDir = dirname(LOG_FILE);
+    $logDir = dirname(APP_LOG_FILE);
 
     // Create directory if missing
     if (!is_dir($logDir)) {
@@ -25,8 +25,8 @@ function app_log(string $message, string $level = 'info', array $context = []): 
     }
 
     // Rotate log if larger than 5MB
-    if (file_exists(LOG_FILE) && filesize(LOG_FILE) > 5 * 1024 * 1024) {
-        rename(LOG_FILE, LOG_FILE . '.' . date('Y-m-d_H-i-s') . '.bak');
+    if (file_exists(APP_LOG_FILE) && filesize(APP_LOG_FILE) > 5 * 1024 * 1024) {
+        rename(APP_LOG_FILE, APP_LOG_FILE . '.' . date('Y-m-d_H-i-s') . '.bak');
     }
 
     $entry = [
@@ -43,7 +43,7 @@ function app_log(string $message, string $level = 'info', array $context = []): 
     $logLine = json_encode($entry) . PHP_EOL;
 
     // Write atomically with file lock
-    $fp = fopen(LOG_FILE, 'a');
+    $fp = fopen(APP_LOG_FILE, 'a');
     if ($fp) {
         flock($fp, LOCK_EX);
         fwrite($fp, $logLine);

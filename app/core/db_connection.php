@@ -5,7 +5,7 @@
  */
 
 require_once ROOT_PATH . 'config/config.php';
-require_once LOGGER_PATH;
+require_once LOGGER_FILE;
 
 // Prevent direct access or loading before config.php
 if (!defined('DB_HOST')) {

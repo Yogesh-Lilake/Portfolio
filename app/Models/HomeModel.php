@@ -21,7 +21,7 @@ class HomeModel
         require_once CACHESERVICE_FILE;
 
         // Path to /resources/defaults/home.json
-        $this->defaultPath = HOME_DEFAULTS_FILE;
+        $this->defaultPath = HOME_DEFAULT_FILE;
     }
 
 

@@ -12,7 +12,7 @@ require_once APP_FILE;
 require_once CONTROLLER_FILE;
 
 // Logger + Error Handler
-require_once LOGGER_PATH;
+require_once LOGGER_FILE;
 require_once ERROR_HANDLER_FILE;
 
 // RUN HOME CONTROLLER
