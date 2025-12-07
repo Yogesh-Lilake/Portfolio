@@ -94,6 +94,86 @@ The system includes:
 - No credentials leak
 - Sanitized output using helpers
 - Secure mail system
+- This project now implements **enterprise-grade contact form security**, including:
+    ### ✔ 1. Honeypot Bot Protection  
+      - Invisible field `hp_name` detects bots automatically.
+
+    ### ✔ 2. IP-Based Rate Limiting  
+      - Protects your email inbox from abuse:
+
+          | Window | Limit |
+          |--------|--------|
+          | Per 60 seconds | 1 message |
+          | Per hour | Max 5 messages |
+
+      - Implemented inside `send_message.php` using SQL window checks.
+
+    ### ✔ 3. Email Delivery Audit Logging  
+      - Every submission is stored safely in DB before attempting to send email.
+
+        | Column | Meaning |
+        |--------|---------|
+        | `email_sent = 1` | Email delivered successfully |
+        | `email_sent = 0` | Delivery failed |
+        | `email_error` | Stores SMTP failure message (truncated) |
+
+      - This guarantees **no message is ever lost**, even if your email provider fails.
+
+    ### ✔ 4. PHPMailer Enterprise Pipeline  
+      - Modern PHPMailer integration with:
+
+        - try/catch guards  
+        - authenticated SMTP delivery  
+        - safer From/Reply-To handling  
+        - HTML message template  
+        - spam-safe headers  
+
+    ### ✔ 5. Hardened Frontend JS Pipeline  
+      - contact.js now includes:
+
+        - loading states  
+        - toast messages  
+        - AJAX submission  
+        - graceful fallback  
+        - improved error handling  
+
+---
+
+# 📨 **Enterprise Contact API Architecture (Updated)**
+
+Your contact functionality now works like a **real API service**:
+
+**Pipeline:**  
+1️⃣ Validate input  
+2️⃣ Honeypot spam check  
+3️⃣ Rate-limit check  
+4️⃣ Insert message log (email_sent = 0)  
+5️⃣ Attempt SMTP send  
+6️⃣ Update message log with success or failure  
+7️⃣ Send JSON response  
+
+This makes your contact form **reliable, secure, and production-ready.**
+
+---
+
+# 🎯 **File Load Ordering Fix (New)**
+
+`public/contact.php` now loads files in a safe deterministic order:
+
+1. `paths.php`  
+2. `bootstrap.php`  
+3. `vendor/autoload.php` (PHPMailer)  
+4. Controller execution  
+5. View rendering  
+
+This prevents:
+
+- header not rendering  
+- nav links disappearing  
+- PATH constant errors  
+- duplicate config loading  
+
+---
 
 ### ✔ **Unified Model Architecture**
 Every Model follows:
@@ -263,6 +343,7 @@ Portfolio/
 │     ├── notes.php # Notes / blogs
 │     ├── contact.php # Contact page
 │     ├── downloadcv.php # download the CV
+│     ├── send_message.php # Send Email (SMTP)
 │
 ├── routes/
 │    └── web.php
@@ -279,12 +360,60 @@ Portfolio/
 
 ---
 
+# 🧪 Testing Contact System (New)
+
+You can now test all phases easily:
+
+### ✔ Honeypot Test  
+Open DevTools → fill hidden field → submit → expect:
+
+
+### ✔ Rate Limiting Test  
+Send 2 messages within 60 seconds → expect:
+
+
+### ✔ Email Delivery Logging Test  
+Temporarily break EMAIL_PASS in config.php.
+
+Submit form → DB should store:
+
+| email_sent | email_error |
+|-----------|-------------|
+| 0 | SMTP authentication error… |
+
+### ✔ DB Success Test  
+Fix email credentials → submit message → DB:
+
+| email_sent | email_error |
+|-----------|-------------|
+| 1 | NULL |
+
+---
+
+# ⚡ JavaScript Contact Pipeline (Updated)
+
+contact.js now:
+
+- Sends AJAX requests  
+- Handles loading animation  
+- Displays dynamic toast messages  
+- Works even if JavaScript errors occur  
+- No page reload required  
+- No dependency on reCAPTCHA for now  
+
+---
+
+
 ## 🔐 Sensitive Files (NOT uploaded to GitHub)
 
   - `.gitignore` protects these:
     ── config/config.php # Project sensitive data (ignored by Git)
     ── logs/ # Logs file (ignored by Git)
     ── uploads/ # User uploads (ignored by Git)
+    ── vendor/ # (ignored by Git)
+      ── composer/ # (ignored by Git)
+      ── phpmailer/ # (ignored by Git)
+      ── autoload.php # (ignored by Git)
 
 ---
 
