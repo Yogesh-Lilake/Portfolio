@@ -450,7 +450,6 @@ Portfolio/
 
 You can now test all phases easily:
 
-<<<<<<< HEAD
 ### ✔ Honeypot Test
 Open DevTools → fill hidden field → submit → expect:
 
@@ -460,17 +459,6 @@ Send 2 messages within 60 seconds → expect:
 
 
 ### ✔ Email Delivery Logging Test
-=======
-### ✔ Honeypot Test  
-Open DevTools → fill hidden field → submit → expect:
-
-
-### ✔ Rate Limiting Test  
-Send 2 messages within 60 seconds → expect:
-
-
-### ✔ Email Delivery Logging Test  
->>>>>>> 5148c5d7999efe2e6f4ba2ccd574a3532a969a5b
 Temporarily break EMAIL_PASS in config.php.
 
 Submit form → DB should store:
@@ -479,11 +467,7 @@ Submit form → DB should store:
 |-----------|-------------|
 | 0 | SMTP authentication error… |
 
-<<<<<<< HEAD
 ### ✔ DB Success Test
-=======
-### ✔ DB Success Test  
->>>>>>> 5148c5d7999efe2e6f4ba2ccd574a3532a969a5b
 Fix email credentials → submit message → DB:
 
 | email_sent | email_error |
@@ -496,21 +480,12 @@ Fix email credentials → submit message → DB:
 
 contact.js now:
 
-<<<<<<< HEAD
 - Sends AJAX requests
 - Handles loading animation
 - Displays dynamic toast messages
 - Works even if JavaScript errors occur
 - No page reload required
 - No dependency on reCAPTCHA for now
-=======
-- Sends AJAX requests  
-- Handles loading animation  
-- Displays dynamic toast messages  
-- Works even if JavaScript errors occur  
-- No page reload required  
-- No dependency on reCAPTCHA for now  
->>>>>>> 5148c5d7999efe2e6f4ba2ccd574a3532a969a5b
 
 ---
 
