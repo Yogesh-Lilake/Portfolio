@@ -8,7 +8,8 @@ if (!defined('APP_LOG_FILE')) {
     die("APP_LOG_FILE not defined. Check paths.php configuration.");
 }
 
-/**
+if(!function_exists('app_log')) {
+    /**
  * Write a log entry.
  *
  * @param string $message
@@ -50,5 +51,6 @@ function app_log(string $message, string $level = 'info', array $context = []): 
         flock($fp, LOCK_UN);
         fclose($fp);
     }
+}
 }
 ?>

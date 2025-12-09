@@ -1,11 +1,17 @@
 <?php
+namespace app\Models;
+
+use PDO;
+use app\Services\CacheService;
+use app\Core\DB;
+use Throwable;
 
 class ProjectModel {
     // private int $defaultTTL = 3600; // 1 hour cache
 
     public function __construct()
     {
-        require_once CACHESERVICE_FILE;
+        // require_once CACHESERVICE_FILE;
         
     }
 

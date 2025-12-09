@@ -1,5 +1,5 @@
 <?php
-
+namespace app\Controllers;
 class ContactController extends Controller
 {
     /** @var ContactModel Handles DB/JSON/fallback for contact page */

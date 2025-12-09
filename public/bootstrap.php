@@ -1,14 +1,24 @@
 <?php
-/**
- * GLOBAL BOOTSTRAP — loads everything required for each page
- */
 
-require_once CONFIG_FILE;
+require __DIR__ . '/../vendor/autoload.php';
 
-// Core (app engine + base controller)
-require_once APP_FILE;
-require_once CONTROLLER_FILE;
+foreach (glob(__DIR__ . '/../app/Helpers/*.php') as $file) {
+    require $file;
+}
 
-// Logger + error handler
-require_once LOGGER_FILE;
-require_once ERROR_HANDLER_FILE;
+spl_autoload_register(function ($class) {
+
+    $prefix = "app\\";
+    if (strpos($class, $prefix) === 0) {
+        $relative = substr($class, strlen($prefix));
+        $relative = str_replace("\\", "/", $relative);
+
+        $file = __DIR__ . '/../app/' . $relative . '.php';
+
+        if (file_exists($file)) {
+            require $file;
+        }
+    }
+});
+
+

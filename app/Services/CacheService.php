@@ -1,5 +1,6 @@
 <?php
-
+namespace app\Services;
+use Throwable;
 class CacheService {
 
     /**

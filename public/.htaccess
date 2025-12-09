@@ -1,0 +1,10 @@
+RewriteEngine On
+RewriteBase /Portfolio/public/
+
+# If file or folder exists → serve directly
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Send everything else to index.php
+RewriteRule ^ index.php [QSA,L]

@@ -1,15 +1,18 @@
 <?php
-/**
- * PUBLIC INDEX.PHP
- * Front Controller (entry point of your application)
- */
 
-require_once __DIR__ . '/../config/paths.php';
-require_once BOOTSTRAP_FILE;
+require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../config/paths.php';
 
-// RUN HOME CONTROLLER
-$data = App::run("HomeController@index");
+// Bootstrap (autoload helpers, models, controllers, env, etc.)
+require __DIR__ . '/bootstrap.php';
 
-// RENDER HOME PAGE VIEW
-require_once HOME_VIEW_FILE;
-?> 
+// Load Router
+require __DIR__ . '/../app/core/Router.php';
+
+$router = new Router();
+
+// Load all routes
+require __DIR__ . '/../routes/web.php';
+
+// Dispatch the current request
+$router->dispatch();

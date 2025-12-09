@@ -1,37 +1,53 @@
-# 🚀 Personal Portfolio Website (PHP 8 + MVC + TailwindCSS + MySQL)
+# 🚀 Personal Portfolio Website (PHP 8 + Custome Router + PSR-4 MVC + TailwindCSS + MySQL) Enterprise Architecture
 
 A modern, scalable, and production-ready **Portfolio Website** built with  
 **PHP 8**, **Modern MVC structure**, **TailwindCSS**, **JavaScript**, and **MySQL**, following a clean, zero-crash, Fully structured Enterprise-Architecture, Fail-safe Models, Cache Engine, Dynamic Layouts, Auto URL Paths.
 
-
 # This project is built with a zero-crash, self-healing backend architecture to always stay online:
-  - If tables are empty → JSON defaults load  
-  - If JSON missing → hard-coded fallbacks load  
-  - Cache boosts performance automatically  
-  - No controller or model can crash the page 
-  - Auto-logs errors.
-  - Environment-independent paths.
-  - Clean MVC-ready folder structure.
 
----  
+- Single Entry-Point Architecture (`All HTTP traffic now goes through only: "public/index.php" `)
+- Fully custom Router (`GET/POST/ANY`)
+- Single-entry front controller architecture
+- PSR-4 namespaces
+- Autoload-first bootstrap
+- JSON fallback engine (`If tables are empty → JSON defaults load`)
+- If JSON missing → hard-coded fallbacks load
+- Smart caching system (`Cache boosts performance automatically`)
+- No controller or model can crash the page
+- Auto-logs errors.
+- Dynamic layouts + auto asset injection
+- Hardened contact API with security pipeline
+
+---
 
 # 🔥 Key Concepts
 
 ### 🧠 **Zero-Crash Enterprise Backend Architecture & Unified 4-Layer Data Architecture**
+
 Every page & model follows:
 
 **A → B → C → D data fallback pipeline**
-  **LEVEL**    **SOURCE**                                      **PURPOSE**
-1.  **A.       Cache (storage/cache/*.json)                 Fastest response**
-2.  **B.       MySQL Database                               Real data**
-3.  **C.       JSON Defaults (app/resources/defaults/*)     Safe content if DB empty**
-4.  **D.       Hard-coded fallbacks                         Last layer, prevents UI break**
+**LEVEL** **SOURCE** **PURPOSE**
+
+1.  **A. Cache (storage/cache/\*.json) Fastest response**
+2.  **B. MySQL Database Real data**
+3.  **C. JSON Defaults (app/resources/defaults/\*) Safe content if DB empty**
+4.  **D. Hard-coded fallbacks Last layer, prevents UI break**
 
 This guarantees **no empty UI**, **zero fatal errors**, and **production reliability**.
 
 ---
 
+## .htaccess handles rewriting:
+
+- RewriteEngine On
+- RewriteBase /Portfolio/public/
+- RewriteCond %{REQUEST_FILENAME} !-f
+- RewriteCond %{REQUEST_FILENAME} !-d
+- RewriteRule ^ index.php [QSA,L]
+
 ## 🛠 Requirements
+
 - PHP 8.x or newer
 - MySQL (XAMPP recommended)
 - Git (for version control)
@@ -41,21 +57,24 @@ This guarantees **no empty UI**, **zero fatal errors**, and **production reliabi
 
 The system includes:
 
-- Dynamic asset loading  
-- Auto-detected BASE_URL (no hardcoded paths)  
-- Modular layouts (`layout_head.php`, `layout_foot.php`)  
-- Clean folder architecture (MVC-ready)  
-- Secure configuration handling  
-- Logging system  
-- Reusable components  
-- SEO-friendly structure  
+- Dynamic asset loading
+- Auto-detected BASE_URL (no hardcoded paths)
+- Modular layouts (`layout_head.php`, `layout_foot.php`)
+- Clean folder architecture (MVC-ready)
+- Secure configuration handling
+- Logging system
+- Reusable components
+- SEO-friendly structure
 
 ---
 
 # 📌 Features
 
 ### 🧩 **Architecture**
-- Fully modular MVC structure
+
+- Fully modular PSR-4 MVC structure
+- Custom Router + routes/web.php
+- Single Entry-Point Architecture (`All HTTP traffic now goes through only: "public/index.php" `)
 - Clean folder structure (`config/`, `public/`, `rotues/`, `app/`)
 - Dynamic header/footer with asset injection
 - Auto-path resolver (no hardcoded URLs)
@@ -70,16 +89,18 @@ The system includes:
 - Centralized helpers for clean code
 
 ### 💾 **Backend**
-- PDO database connection wrapper & Singleton with auto-reconnect(`db_connection.php`)
+
+- PDO database connection wrapper & Singleton with auto-reconnect(`DB.php`)
 - Query health-check (SELECT 1)
 - Auto-fallback content (DB-failure proof)
 - Centralized logger & Error logging (`logger.php`)
-- Automatic caching engine (cache/*.json)
+- Automatic caching engine (cache/\*.json)
 - Helpers for safe queries + sanitization
 - Zero fatal errors (try/catch everywhere)
 - Auto-resolving URLs & paths based on server environment
 
 ### 🎨 **Frontend**
+
 - TailwindCSS + custom CSS + (CDN or local config supported)
 - Smooth animations
 - Fully responsive layout
@@ -88,6 +109,7 @@ The system includes:
 - SEO-optimized HTML structure
 
 ### 🔒 **Security**
+
 - `.gitignore` prevents leaking secrets (`config/config.php`, `logs/`, `uploads/`, `storage/catch/`, `vendor`, `node_modules/`)
 - `config_example.php` for safe public template
 - Logs + uploads excluded from Git
@@ -95,10 +117,20 @@ The system includes:
 - Sanitized output using helpers
 - Secure mail system
 - This project now implements **enterprise-grade contact form security**, including:
+<<<<<<< HEAD
+
+  ### ✔ 1. Honeypot Bot Protection
+
+      - Invisible field `hp_name` detects bots automatically.
+
+  ### ✔ 2. IP-Based Rate Limiting
+
+=======
     ### ✔ 1. Honeypot Bot Protection  
       - Invisible field `hp_name` detects bots automatically.
 
     ### ✔ 2. IP-Based Rate Limiting  
+>>>>>>> 5148c5d7999efe2e6f4ba2ccd574a3532a969a5b
       - Protects your email inbox from abuse:
 
           | Window | Limit |
@@ -108,7 +140,12 @@ The system includes:
 
       - Implemented inside `send_message.php` using SQL window checks.
 
+<<<<<<< HEAD
+  ### ✔ 3. Email Delivery Audit Logging
+
+=======
     ### ✔ 3. Email Delivery Audit Logging  
+>>>>>>> 5148c5d7999efe2e6f4ba2ccd574a3532a969a5b
       - Every submission is stored safely in DB before attempting to send email.
 
         | Column | Meaning |
@@ -119,6 +156,27 @@ The system includes:
 
       - This guarantees **no message is ever lost**, even if your email provider fails.
 
+<<<<<<< HEAD
+  ### ✔ 4. PHPMailer Enterprise Pipeline
+
+      - Modern PHPMailer integration with:
+
+        - try/catch guards
+        - authenticated SMTP delivery
+        - safer From/Reply-To handling
+        - HTML message template
+        - spam-safe headers
+
+  ### ✔ 5. Hardened Frontend JS Pipeline
+
+      - contact.js now includes:
+
+        - loading states
+        - toast messages
+        - AJAX submission
+        - graceful fallback
+        - improved error handling
+=======
     ### ✔ 4. PHPMailer Enterprise Pipeline  
       - Modern PHPMailer integration with:
 
@@ -136,6 +194,7 @@ The system includes:
         - AJAX submission  
         - graceful fallback  
         - improved error handling  
+>>>>>>> 5148c5d7999efe2e6f4ba2ccd574a3532a969a5b
 
 ---
 
@@ -150,9 +209,15 @@ Your contact functionality now works like a **real API service**:
 4️⃣ Insert message log (email_sent = 0)  
 5️⃣ Attempt SMTP send  
 6️⃣ Update message log with success or failure  
+<<<<<<< HEAD
+7️⃣ Send JSON response
+
+This makes your contact form **reliable, secure, and production-ready.** and **Logging ensures no message is ever lost.**
+=======
 7️⃣ Send JSON response  
 
 This makes your contact form **reliable, secure, and production-ready.**
+>>>>>>> 5148c5d7999efe2e6f4ba2ccd574a3532a969a5b
 
 ---
 
@@ -160,6 +225,20 @@ This makes your contact form **reliable, secure, and production-ready.**
 
 `public/contact.php` now loads files in a safe deterministic order:
 
+<<<<<<< HEAD
+1. `paths.php`
+2. `bootstrap.php`
+3. `vendor/autoload.php` (PHPMailer)
+4. Controller execution
+5. View rendering
+
+This prevents:
+
+- header not rendering
+- nav links disappearing
+- PATH constant errors
+- duplicate config loading
+=======
 1. `paths.php`  
 2. `bootstrap.php`  
 3. `vendor/autoload.php` (PHPMailer)  
@@ -172,23 +251,26 @@ This prevents:
 - nav links disappearing  
 - PATH constant errors  
 - duplicate config loading  
+>>>>>>> 5148c5d7999efe2e6f4ba2ccd574a3532a969a5b
 
 ---
 
 ### ✔ **Unified Model Architecture**
+
 Every Model follows:
 
-| Stage | Source | Description |
-|-------|---------|-------------|
-| A | Cache | Fastest response |
-| B | DB | Fetch real data |
-| C | JSON | User-editable defaults |
-| D | Hard Fallback | Never-break guarantee |
+| Stage | Source        | Description            |
+| ----- | ------------- | ---------------------- |
+| A     | Cache         | Fastest response       |
+| B     | DB            | Fetch real data        |
+| C     | JSON          | User-editable defaults |
+| D     | Hard Fallback | Never-break guarantee  |
 
 ### ✔ **Safe View Rendering**
+
 All pages use:
 
-```php
+````php
 ["from_db" => bool, "data" => []]
 
 ### Dynamic Content System
@@ -216,7 +298,7 @@ Portfolio/
 │    │   ├── AboutController.php      # Loads About page (DB → JSON → fallback`)
 │    │   ├── ProjectController.php    # Project pages with pagination + filters`
 │    │   ├── NotesController.php      # Notes, categories, tags, pinned notes`
-│    │   └── ContactController.php    # Developer contact info 
+│    │   └── ContactController.php    # Developer contact info
 │    │
 |    ├── Helpers/ # These files contain reusable PHP helper functions used across all pages.`)
 |    |     ├── helpers.php # Keep code DRY and avoid repeating logic everywhere.`)
@@ -237,15 +319,14 @@ Portfolio/
 │    |    ├── MailService.php # Email handler (contact form)`)
 │    │    ├── HeaderData.php  # Dynamic header data provider
 │    │    └── FooterData.php  # Dynamic footer data provider
-│    ├── core/ # Core contains the foundation of your backend system.`)
+│    ├── Core/ # Core contains the foundation of your backend system.`)
+│    │    ├── App.php  # Enterprise Router for your MVC system
 │    │    ├── Controller.php
-│    │    ├── db_connection.php # PDO connection wrapper
+│    │    ├── DB.php # PDO connection wrapper
 │    │    ├── ErrorHandler.php
-│    │    ├── HeaderData.php # Dynamic header data provider
-│    │    ├── FooterData.php # Dynamic footer data provider
+│    │    ├── Router.php
 │    │
 │    ├── views/
-│    │    ├── components/         # components
 │    │    ├── layouts/            # 🖼 Layout System
 │    │    │     ├── layout_head.php     # <head> section + CSS/JS inject
 │    │    │     ├── layout_foot.php     # Footer scripts
@@ -261,7 +342,7 @@ Portfolio/
 │    │          ├── notes.php
 │    │          ├── contact.php
 │    │
-│    │      
+│    │
 │    ├── resources/
 │       └── defaults/              # JSON fallback files when DB is empty)
 │           │
@@ -301,13 +382,12 @@ Portfolio/
 │── config/ # Configuration files that initialize everything.`)
 │    ├── config.php # Private config (ignored by Git)`)
 │    ├── config_example.php # Public-safe template`)
-│    ├── env.php # Loads hosting provider environment variables`)
 │    ├── paths.php # Auto URL + PATH generator`)
 │
 │── logs/ # Debugging and monitoring.`)
 │     ├── app.log # Runtime logs (ignored by Git)
+│     ├── cv.log # Runtime logs (ignored by Git)
 │
-│── uploads/ # User uploads (ignored by Git)
 │
 │── public/
 │     ├── assets/ # Contains all public-facing files (CSS, JS, images). This folder loads directly in the browser.`)
@@ -337,13 +417,14 @@ Portfolio/
 │     ├── downloads/                # Resume
 │     │       └── .pdf
 │     ├── bootstrap.php # GLOBAL BOOTSTRAP — loads everything required files for each page
-│     ├── index.php # Homepage
-│     ├── about.php # About section
-│     ├── projects.php # Portfolio projects
-│     ├── notes.php # Notes / blogs
-│     ├── contact.php # Contact page
+│     ├── index.php # single entry point
+│     ├── .htaccess # Router rewrite
 │     ├── downloadcv.php # download the CV
+<<<<<<< HEAD
+│     ├── send_message.php # Send Email (SMTP) & legacy fallback if needed
+=======
 │     ├── send_message.php # Send Email (SMTP)
+>>>>>>> 5148c5d7999efe2e6f4ba2ccd574a3532a969a5b
 │
 ├── routes/
 │    └── web.php
@@ -352,9 +433,14 @@ Portfolio/
 │         ├── *.json  # Improves performance dramatically`)
 │
 ├── vendor/
+│     ├── composer/
+│     ├── phpmailer/
+│     ├── autoload.php
 ├── .env
 ├── .gitignore
 ├── .htaccess
+├── composer.json
+├── composer.lock
 ├── README.md
 
 
@@ -364,6 +450,17 @@ Portfolio/
 
 You can now test all phases easily:
 
+<<<<<<< HEAD
+### ✔ Honeypot Test
+Open DevTools → fill hidden field → submit → expect:
+
+
+### ✔ Rate Limiting Test
+Send 2 messages within 60 seconds → expect:
+
+
+### ✔ Email Delivery Logging Test
+=======
 ### ✔ Honeypot Test  
 Open DevTools → fill hidden field → submit → expect:
 
@@ -373,6 +470,7 @@ Send 2 messages within 60 seconds → expect:
 
 
 ### ✔ Email Delivery Logging Test  
+>>>>>>> 5148c5d7999efe2e6f4ba2ccd574a3532a969a5b
 Temporarily break EMAIL_PASS in config.php.
 
 Submit form → DB should store:
@@ -381,7 +479,11 @@ Submit form → DB should store:
 |-----------|-------------|
 | 0 | SMTP authentication error… |
 
+<<<<<<< HEAD
+### ✔ DB Success Test
+=======
 ### ✔ DB Success Test  
+>>>>>>> 5148c5d7999efe2e6f4ba2ccd574a3532a969a5b
 Fix email credentials → submit message → DB:
 
 | email_sent | email_error |
@@ -394,12 +496,21 @@ Fix email credentials → submit message → DB:
 
 contact.js now:
 
+<<<<<<< HEAD
+- Sends AJAX requests
+- Handles loading animation
+- Displays dynamic toast messages
+- Works even if JavaScript errors occur
+- No page reload required
+- No dependency on reCAPTCHA for now
+=======
 - Sends AJAX requests  
 - Handles loading animation  
 - Displays dynamic toast messages  
 - Works even if JavaScript errors occur  
 - No page reload required  
 - No dependency on reCAPTCHA for now  
+>>>>>>> 5148c5d7999efe2e6f4ba2ccd574a3532a969a5b
 
 ---
 
@@ -423,14 +534,40 @@ contact.js now:
 git clone https://github.com/Userrr404/Portfolio.git
 cd Portfolio
 
+2️⃣ Install PHP dependencies (PHPMailer)
+Your project requires Composer because PHPMailer is installed via Composer.
+    - Open terminal (C:\xampp\htdocs\Portfolio\):
+      ── Run:
+        - composer install
+
+      ── If PHPMailer is not installed yet:
+        - composer require phpmailer/phpmailer
+
+      ── This will generate:
+        - vendor/
+        - vendor/autoload.php
+
+✔ This file is required for email sending.
+
 ### 2️⃣ Create your secure config
 cp config/config_example.php config/config.php
 
     - Then open config.php and set:
-      ── DB_HOST=localhost
-      ── DB_NAME=portfolio
-      ── DB_USER=root
-      ── DB_PASS=
+      ── 🔧 Database Settings:
+          ── DB_HOST=localhost
+          ── DB_NAME=portfolio
+          ── DB_USER=root
+          ── DB_PASS=
+
+      ── 🔧 Email Settings (PHPMailer SMTP Settings)
+          ── EMAIL_HOST=smtp.gmail.com
+          ── EMAIL_PORT=587
+          ── EMAIL_USER=yourgmail@gmail.com
+          ── EMAIL_PASS=your-app-password
+
+📌 Important: Gmail no longer accepts normal password.
+Use App Password from:
+https://myaccount.google.com/apppasswords
 
 ### 3️⃣ Import the MySQL database
     - CREATE DATABASE portfolio;
@@ -443,7 +580,9 @@ cp config/config_example.php config/config.php
 
     - Start Apache + MySQL
       ── Then open:
-        -- http://localhost/Portfolio/
+        -- http://localhost/Portfolio/public/
+
+```
 
 ---
 
@@ -452,6 +591,7 @@ cp config/config_example.php config/config.php
 ### This architecture is built for:
   - Real production hosting
   - Zero downtime
-  - Easy editing (JSON defaults)
-  - Speed (automatic caching)
-  - Expandability (clean Controllers/Models)
+  - Automatic fallback safety
+  - Speed via caching
+  - Clean MVC separation
+  - Future scalability (middleware, modules, services)

@@ -1,14 +1,13 @@
 <?php
+namespace app\Core;
+
+use Exception;
 
 class Controller {
 
-    /**
-     * Load a view file from /views folder
-     * Automatically extracts variables passed via $data
-     */
-    public function view($view, $data = []) {
-
-        $path = ROOT_PATH . "views/" . $view . ".php";
+    public function view($view, $data = [])
+    {
+        $path = ROOT_PATH . "app/views/" . $view . ".php";
 
         if (!file_exists($path)) {
             throw new Exception("View file not found: " . $path);

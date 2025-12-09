@@ -1,4 +1,14 @@
 <?php
+namespace app\Controllers;
+
+use app\core\Controller;
+use app\Models\HomeModel;
+use app\Models\AboutModel;
+use app\Models\SkillModel;
+use app\Models\ProjectModel;
+use app\Models\ContactModel;
+use app\Services\CacheService;
+use Throwable;
 
 class HomeController extends Controller
 {
@@ -12,16 +22,6 @@ class HomeController extends Controller
 
     public function __construct()
     {
-        // Load all models
-        require_once HOME_MODEL_FILE;
-        require_once ABOUT_MODEL_FILE;
-        require_once SKILL_MODEL_FILE;
-        require_once PROJECT_MODEL_FILE;
-        require_once CONTACT_MODEL_FILE;
-
-        // SERVICES
-        require_once CACHESERVICE_FILE;
-
         $this->home     = new HomeModel();
         $this->about    = new AboutModel();
         $this->skills   = new SkillModel();
@@ -42,18 +42,18 @@ class HomeController extends Controller
              * --------------------------------------------------- */
             /* Cache → whole page */
             if ($cached = CacheService::load($this->cacheKey)) {
-                return $cached;
+                return $this->view("home/index", $cached);
             }
 
             /* ---------------------------------------------------
              * 2. SAFE DB LOAD (per section)
              * --------------------------------------------------- */
             $data = [
-                "home"     => $this->safeLoad(fn() => $this->home->get(),       "home"),
-                "about"    => $this->safeLoad(fn() => $this->about->get(),      "about"),
-                "skills"   => $this->safeLoad(fn() => $this->skills->all(),     "skills"),
+                "home"     => $this->safeLoad(fn() => $this->home->get(), "home"),
+                "about"    => $this->safeLoad(fn() => $this->about->get(), "about"),
+                "skills"   => $this->safeLoad(fn() => $this->skills->all(), "skills"),
                 "projects" => $this->safeLoad(fn() => $this->projects->getFeatured(), "projects"),
-                "contact"  => $this->safeLoad(fn() => $this->contact->get(),    "contact"),
+                "contact"  => $this->safeLoad(fn() => $this->contact->get(), "contact"),
             ];
 
 
@@ -64,7 +64,7 @@ class HomeController extends Controller
                 CacheService::save($this->cacheKey, $data);
             }
 
-            return $data;
+            return $this->view("home/index", $data);
 
         } catch (Throwable $e) {
 
@@ -73,13 +73,13 @@ class HomeController extends Controller
              * --------------------------------------------------- */
             app_log("HomeController@index FAILED: " . $e->getMessage(), "error");
 
-            return [
+            return $this->view("home/index", [
                 "home"     => $this->fallback("home"),
                 "about"    => $this->fallback("about"),
                 "skills"   => [],
                 "projects" => [],
                 "contact"  => $this->fallback("contact"),
-            ];
+            ]);
         }
     }
 
@@ -147,37 +147,40 @@ class HomeController extends Controller
     /**
      * Returns minimal guaranteed-safe fallback for each section
      */
-    private function fallback(string $section)
+    private function fallback(string $section): array
     {
         return match ($section) {
 
             "home" => [
-                "hero_heading"        => "Welcome to my Portfolio",
-                "hero_subheading"     => "Full Stack Developer",
-                "hero_description"  => "Building applications with clean architecture and performance in mind.",
+                "hero_heading"      => "Welcome to my Portfolio",
+                "hero_subheading"   => "Full Stack Developer",
+                "hero_description"  => "Building applications with clean architecture and performance.",
                 "background_image"  => IMG_URL . "default-hero-bg.jpg",
                 "background_lottie" => "https://assets10.lottiefiles.com/packages/lf20_q5pk6p1k.json",
                 "cta_primary_text"  => "View Projects",
-                "cta_primary_link"  => "projects.php",
+                "cta_primary_link"  => "/projects",
                 "cta_secondary_text"=> "Download CV",
-                "cta_secondary_link"=> "download-cv.php",
-                "cv_file_path"      => "downloads/Yogesh_Lilake_Resume.pdf",
-                "is_active"         => 1
+                "cta_secondary_link"=> "/downloadcv",
+                "cv_file_path"      => "/downloads/Yogesh_Lilake_Resume.pdf",
+                "is_active"         => 1,
+                "is_default"        => true
             ],
 
             "about" => [
-                "title" => "About Me",
-                "content" => "Hi, I'm Yogesh — Full Stack Developer specializing in scalable systems."
-            ],
-            
-            "contact" => [
-                "title" => "Contact",
-                "subtitle" => "Let's build something amazing.",
-                "button_text" => "Email Me",
-                "button_link" => "mailto:contact@example.com"
+                "title"       => "About Me",
+                "content"     => "Hi, I'm Yogesh — Full Stack Developer specializing in scalable systems.",
+                "is_default"  => true
             ],
 
-            default => []
+            "contact" => [
+                "title"       => "Contact",
+                "subtitle"    => "Let's build something amazing.",
+                "button_text" => "Email Me",
+                "button_link" => "mailto:contact@example.com",
+                "is_default"  => true
+            ],
+
+            default => ["is_default" => true]
         };
     }
 

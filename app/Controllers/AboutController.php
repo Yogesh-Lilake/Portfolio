@@ -1,4 +1,11 @@
 <?php
+namespace app\Controllers;
+
+use app\core\Controller;
+use app\Models\AboutModel;
+use app\Services\CacheService;
+use Throwable;
+
 
 class AboutController extends Controller
 {
@@ -13,8 +20,6 @@ class AboutController extends Controller
 
     public function __construct()
     {
-        require_once ABOUT_MODEL_FILE;
-        require_once CACHESERVICE_FILE;
 
         $this->about = new AboutModel();
     }

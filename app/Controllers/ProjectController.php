@@ -1,5 +1,5 @@
 <?php
-
+namespace app\Controllers;
 class ProjectController extends Controller
 {
     private ProjectModel $projects;

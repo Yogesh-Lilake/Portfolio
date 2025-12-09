@@ -4,13 +4,14 @@
  * Receives $data from HomeController
  */
 
-// Extract data
+// Extract formatted sections (controller guarantees structure)
+$home     = $data["home"]["data"] ?? [];
+$about    = $data["about"]["data"] ?? [];
 $skills   = $data["skills"]["data"] ?? [];
 $projects = $data["projects"]["data"] ?? [];
-$about    = $data["about"]["data"] ?? [];
-$home     = $data["home"]["data"] ?? [];
 $contact  = $data["contact"]["data"] ?? [];
 
+// Safe helpers
 function safe($value) {
     return htmlspecialchars($value ?? "", ENT_QUOTES, 'UTF-8');
 }
@@ -19,6 +20,7 @@ function field($array, $key, $default = "") {
     return isset($array[$key]) ? safe($array[$key]) : $default;
 }
 
+// Page metadata
 $page_title = "Yogesh Portfolio | Full Stack Developer";
 $custom_css = [INDEX_CSS];
 $custom_js  = [INDEX_JS];
@@ -79,13 +81,15 @@ require_once LAYOUT_HEAD_FILE;
         <h3 class="text-3xl sm:text-4xl font-bold mb-10 text-accent">Skills</h3>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 sm:gap-6">
 
-            <?php if(empty($skills)): ?>
+            <?php if (empty($skills)): ?>
                 <p>No skills found.</p>
             <?php else: ?>
-                <?php foreach ($skills as $s): ?>
+                <?php foreach ($skills as $skill): ?>
                     <div class="p-4 bg-[#1E293B] rounded-xl hover:bg-accent hover:text-darkbg transition transform hover:scale-105">
-                        <i class="<?= $s['icon_class'] ?> <?= field($s, 'color_class') ?> text-3xl sm:text-4xl md:text-5xl mb-3"></i>
-                        <h4 class="font-semibold"><?= field($s, 'skill_name') ?></h4>
+                        <i class="<?= safe($skill['icon_class'] ?? '') ?> <?= safe($skill['color_class'] ?? '') ?> 
+                           text-3xl sm:text-4xl md:text-5xl mb-3"></i>
+
+                        <h4 class="font-semibold"><?= field($skill, 'skill_name') ?></h4>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
@@ -99,17 +103,22 @@ require_once LAYOUT_HEAD_FILE;
     <h2 class="text-3xl sm:text-4xl font-bold mb-12 text-center text-accent">Featured Projects</h2>
 
     <div class="grid gap-8 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 max-w-screen-xl mx-auto">
-        <?php if(empty($projects)): ?>
+
+        <?php if (empty($projects)): ?>
             <p>No featured projects found.</p>
         <?php else: ?>
-            <?php foreach ($projects as $p): ?>
+            <?php foreach ($projects as $project): ?>
                 <div class="bg-[#1E293B] rounded-xl overflow-hidden shadow-lg hover:scale-105 transition">
-                    <img src="<?= field($p, 'image_path') ?>" alt="<?= field($p, 'title') ?>" class="aspect-video w-full object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2"><?= field($p, 'title') ?></h3>
-                        <p class="text-gray-400 text-sm mb-4"><?= field($p, 'description') ?></p>
 
-                        <a href="<?= field($p, 'project_link') ?>" class="text-accent hover:underline">
+                    <img src="<?= field($project, 'image_path') ?>" 
+                         alt="<?= field($project, 'title') ?>" 
+                         class="aspect-video w-full object-cover">
+
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2"><?= field($project, 'title') ?></h3>
+                        <p class="text-gray-400 text-sm mb-4"><?= field($project, 'description') ?></p>
+
+                        <a href="<?= field($project, 'project_link') ?>" class="text-accent hover:underline">
                             View →
                         </a>
                     </div>
@@ -119,7 +128,8 @@ require_once LAYOUT_HEAD_FILE;
     </div>
 
     <div class="text-center mt-10">
-        <a href="<?= PROJECTS_URL ?>" class="border border-accent text-accent px-6 py-3 rounded-full hover:bg-accent hover:text-darkbg transition">
+        <a href="/projects" 
+           class="border border-accent text-accent px-6 py-3 rounded-full hover:bg-accent hover:text-darkbg transition">
             See All Projects
         </a>
     </div>

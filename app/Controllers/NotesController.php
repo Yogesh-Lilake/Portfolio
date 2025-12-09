@@ -1,5 +1,5 @@
 <?php
-
+namespace app\Controllers;
 class NotesController extends Controller
 {
     private NoteModel $notes;

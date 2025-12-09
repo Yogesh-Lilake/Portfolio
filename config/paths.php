@@ -29,19 +29,19 @@ define('BOOTSTRAP_FILE', PUBLIC_PATH . 'bootstrap.php');
 ---------------------------------------------- */
 define('APP_PATH', ROOT_PATH . 'app/');
 
-define('CORE_PATH', APP_PATH . 'core/');
-define('CONTROLLERS_PATH', APP_PATH . 'controllers/');
-define('MODELS_PATH', APP_PATH . 'models/');
+define('CORE_PATH', APP_PATH . 'Core/');
+define('CONTROLLERS_PATH', APP_PATH . 'Controllers/');
+define('MODELS_PATH', APP_PATH . 'Models/');
 define('RESOURCES_PATH', APP_PATH . 'resources/');
 define('VIEWS_PATH', APP_PATH . 'views/');
-define('SERVICES_PATH', APP_PATH . 'services/');
-define('HELPERS_PATH', APP_PATH . 'helpers/');
+define('SERVICES_PATH', APP_PATH . 'Services/');
+define('HELPERS_PATH', APP_PATH . 'Helpers/');
 
 
 
 define('APP_FILE', CORE_PATH . 'app.php');
 define('CONTROLLER_FILE', CORE_PATH . 'Controller.php');
-define('DB_CONNECTION_FILE', CORE_PATH . 'db_connection.php');
+define('DB_CONNECTION_FILE', CORE_PATH . 'DB.php');
 define('ERROR_HANDLER_FILE', CORE_PATH . 'ErrorHandler.php');
 
 
