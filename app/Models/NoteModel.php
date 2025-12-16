@@ -36,7 +36,10 @@ class NoteModel
             $pdo = DB::getInstance()->pdo();
 
             $stmt = $pdo->prepare("
-                SELECT n.*, c.slug, c.name AS category_name
+                SELECT 
+                    n.*,
+                    c.name AS category_name,
+                    c.slug AS category_slug
                 FROM notes n
                 JOIN note_categories c ON n.category_id = c.id
                 WHERE n.is_active = 1
@@ -188,16 +191,20 @@ class NoteModel
         try {
             $pdo = DB::getInstance()->pdo();
 
-            $sql = "
-                SELECT n.*, c.slug, c.name AS category_name
+            $stmt = $pdo->prepare("
+                SELECT 
+                    n.*,
+                    c.name AS category_name,
+                    c.slug AS category_slug
                 FROM notes n
                 JOIN note_categories c ON n.category_id = c.id
-                WHERE n.is_pinned = 1
+                WHERE n.is_pinned = 1 AND n.is_active = 1
                 ORDER BY n.created_at DESC
                 LIMIT 6
-            ";
+            ");
+            $stmt->execute();
 
-            $rows = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             if (!empty($rows)) {
                 CacheService::save($this->cacheKeyPinned, $rows, 3600);
@@ -205,7 +212,7 @@ class NoteModel
             }
 
         } catch (Throwable $e) {
-            app_log("NoteModel@getPinnedNotes error: " . $e->getMessage(), "error");
+            app_log('NoteModel@getPinnedNotes error: ' . $e->getMessage(), 'error');
         }
 
         // C. Try default JSON
@@ -216,5 +223,72 @@ class NoteModel
 
         // D. fallback
         return [];
+    }
+
+    /* ========================= NOTE DETAIL ========================= */
+
+    public function getNoteBySlug(string $slug): ?array
+    {
+        try {
+            $pdo = DB::getInstance()->pdo();
+
+            $stmt = $pdo->prepare("
+                SELECT 
+                    n.*,
+                    c.name AS category_name,
+                    c.slug AS category_slug
+                FROM notes n
+                JOIN note_categories c ON n.category_id = c.id
+                WHERE n.slug = :slug AND n.is_active = 1
+                LIMIT 1
+            ");
+            $stmt->execute(['slug' => $slug]);
+
+            return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        } catch (Throwable $e) {
+            app_log('getNoteBySlug error: ' . $e->getMessage(), 'error');
+            return null;
+        }
+    }
+
+    public function getTagsByNoteId(int $noteId): array
+    {
+        try {
+            $pdo = DB::getInstance()->pdo();
+
+            $stmt = $pdo->prepare("
+                SELECT t.name
+                FROM note_tags t
+                JOIN note_tag_map ntm ON ntm.tag_id = t.id
+                WHERE ntm.note_id = ?
+            ");
+            $stmt->execute([$noteId]);
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Throwable $e) {
+            app_log('getTagsByNoteId error: ' . $e->getMessage(), 'error');
+            return [];
+        }
+    }
+
+    public function getRelatedNotes(int $categoryId, int $excludeId): array
+    {
+        try {
+            $pdo = DB::getInstance()->pdo();
+
+            $stmt = $pdo->prepare("
+                SELECT id, title, slug
+                FROM notes
+                WHERE category_id = ? AND id != ?
+                ORDER BY created_at DESC
+                LIMIT 4
+            ");
+            $stmt->execute([$categoryId, $excludeId]);
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Throwable $e) {
+            app_log('getRelatedNotes error', 'error');
+            return [];
+        }
     }
 }

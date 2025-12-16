@@ -14,29 +14,6 @@ $extra_js = [
     GSAP_SCROLLTRIGGER_CDN,
 ];
 
-/* ===================================================
-   Helper Functions (NULL SAFE + HTML SAFE)
-   =================================================== */
-
-function safe($value, string $default = '')
-{
-    if (!isset($value) || $value === '' || $value === false || $value === null) {
-        return $default;
-    }
-
-    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
-}
-
-function safeStr($value, int $length = 120, string $default = ''): string
-{
-    if (!isset($value) || $value === '' || $value === false || $value === null) {
-        return $default;
-    }
-
-    $value = (string)$value; // Convert to safe string
-    return htmlspecialchars(substr($value, 0, $length), ENT_QUOTES, 'UTF-8');
-}
-
 require_once LAYOUT_HEAD_FILE;
 ?>
 
@@ -74,7 +51,8 @@ require_once LAYOUT_HEAD_FILE;
                     <?= safe(substr((string)($note['description'] ?? ''), 0, 100)) ?>...
                 </p>
 
-                <a href="<?= safe($note['link'] ?? '') ?>" class="text-accent hover:underline text-sm font-medium">
+                <!-- PINNED NOTES -->
+                <a href="<?= url('notes/' . $note['slug']) ?>" class="text-accent hover:underline text-sm font-medium">
                     Read More →
                 </a>
             </div>
@@ -142,7 +120,7 @@ require_once LAYOUT_HEAD_FILE;
     <?php if (!empty($notes)): ?>
         <?php foreach ($notes as $note): ?>
             <div class="note-card bg-card p-6 rounded-2xl border border-gray-700 hover:shadow-xl transition-all duration-700"
-                 data-cat="<?= safe($note['slug']) ?>">
+                 data-cat="<?= safe($note['category_slug']) ?>">
 
                 <h3 class="text-xl font-semibold mb-2 text-white">
                     <?= safe($note['title']) ?>
@@ -153,7 +131,7 @@ require_once LAYOUT_HEAD_FILE;
                 </p>
 
                 <div class="flex justify-between items-center">
-                  <a href="<?= safe($note['link']) ?>" class="text-accent hover:underline text-sm font-medium">
+                  <a href="<?= url('notes/' . $note['slug']) ?>" class="text-accent hover:underline text-sm font-medium">
                       Read More →
                   </a>
 

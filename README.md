@@ -292,6 +292,7 @@ Portfolio/
 │    │    |     ├── notes.php
 │    │    |     ├── contact.php
 │    │    |     ├── project-detail.php   # single project detail page according to {slug}
+│    │    |     ├── note-detail.php   # single note detail page according to {slug}
 |    |    |
 │    │    ├── components/              # 📄 Page Views
 │    │          ├── header.php          # Navigation bar

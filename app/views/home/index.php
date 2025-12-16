@@ -11,14 +11,6 @@ $skills   = $data["skills"]["data"] ?? [];
 $projects = $data["projects"]["data"] ?? [];
 $contact  = $data["contact"]["data"] ?? [];
 
-// Safe helpers
-function safe($value) {
-    return htmlspecialchars($value ?? "", ENT_QUOTES, 'UTF-8');
-}
-
-function field($array, $key, $default = "") {
-    return isset($array[$key]) ? safe($array[$key]) : $default;
-}
 
 // Page metadata
 $page_title = "Yogesh Portfolio | Full Stack Developer";

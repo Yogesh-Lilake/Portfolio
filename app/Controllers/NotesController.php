@@ -101,4 +101,38 @@ class NotesController extends Controller
         return false;
     }
 
+    public function show(string $slug)
+    {
+        try {
+            $cacheKey = "note_detail_" . md5($slug);
+
+            if ($cached = CacheService::load($cacheKey)) {
+                return $this->view("pages/note-detail", $cached);
+            }
+
+            $note = $this->notes->getNoteBySlug($slug);
+
+            if (!$note) {
+                http_response_code(404);
+                echo "<h1>404 - Notes not found</h1>";
+                exit;
+            }
+
+            $data = [
+                "note"       => $note,
+                "tags"       => $this->notes->getTagsByNoteId($note['id']),
+                "related"    => $this->notes->getRelatedNotes($note['category_id'], $note['id']),
+            ];
+
+            CacheService::save($cacheKey, $data, 3600);
+
+            return $this->view("pages/note-detail", $data);
+
+        } catch (Throwable $e) {
+            app_log("NotesController@show failed: " . $e->getMessage(), "error");
+            http_response_code(500);
+            echo "<h1>500 - Internal Server Error</h1><p>Sorry, something went wrong.</p>";
+            exit;
+        }
+    }
 }

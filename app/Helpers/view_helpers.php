@@ -23,3 +23,30 @@ function url(string $path = ''): string
 
     return BASE_URL . $path;
 }
+
+function field($array, $key, $default = "") {
+    return isset($array[$key]) ? safe($array[$key]) : $default;
+}
+
+if (!function_exists('safe')) {
+    function safe($value, string $default = ''): string
+    {
+        if (!isset($value) || $value === '' || $value === false || $value === null) {
+            return $default;
+        }
+
+        return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+if (!function_exists('safeStr')) {
+    function safeStr($value, int $length = 120, string $default = ''): string
+    {
+        if (!isset($value) || $value === '' || $value === false || $value === null) {
+            return $default;
+        }
+
+        return htmlspecialchars(substr((string)$value, 0, $length), ENT_QUOTES, 'UTF-8');
+    }
+}
+
