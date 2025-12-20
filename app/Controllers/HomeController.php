@@ -49,11 +49,11 @@ class HomeController extends Controller
              * 2. SAFE DB LOAD (per section)
              * --------------------------------------------------- */
             $data = [
-                "home"     => $this->safeLoad(fn() => $this->home->get(), "home"),
-                "about"    => $this->safeLoad(fn() => $this->about->get(), "about"),
-                "skills"   => $this->safeLoad(fn() => $this->skills->all(), "skills"),
-                "projects" => $this->safeLoad(fn() => $this->projects->getFeatured(), "projects"),
-                "contact"  => $this->safeLoad(fn() => $this->contact->get(), "contact"),
+                "home"     => $this->wrap($this->home->get(), "home"),
+                "about"    => $this->wrap($this->about->get(), "about"),
+                "skills"   => $this->wrap($this->skills->all(), "skills"),
+                "projects" => $this->wrapProject($this->projects->getFeatured()),
+                "contact"  => $this->wrap($this->contact->get(), "contact"),
             ];
 
 
@@ -74,127 +74,49 @@ class HomeController extends Controller
             app_log("HomeController@index FAILED: " . $e->getMessage(), "error");
 
             return $this->view("home/index", [
-                "home"     => $this->fallback("home"),
-                "about"    => $this->fallback("about"),
-                "skills"   => [],
-                "projects" => [],
-                "contact"  => $this->fallback("contact"),
+                "home"     => ["from_db" => false, "data" => []],
+                "about"    => ["from_db" => false, "data" => []],
+                "skills"   => ["from_db" => false, "data" => []],
+                "projects" => ["from_db" => false, "data" => []],
+                "contact"  => ["from_db" => false, "data" => []],
             ]);
         }
     }
 
 
     /* ============================================================
-     * SECTION WRAPPERS (safe load)
+     * STANDARD WRAPPER FOR ALL MODELS
      * ============================================================ */
-
-    /**
-     * Safely loads a model section.
-     * Prevents any model failure from breaking the home page.
-     */
-    private function safeLoad(callable $fn, string $label)
+    private function wrap($data, string $label): array
     {
-        try {
-            $data = $fn();
-
-            // If model returned non-array → fix it
-            if (!is_array($data)) {
-                // return ["from_db" => false] + $this->fallback($label);
-                // convert to bootom return statement because create 1 extra black field in skills and others section
-                return [
-                    "from_db" => false,
-                    "data"    => $this->fallback($label)
-                ];
-            }
-
-            // CASE 1: Model returned fallback defaults (contains is_default)
-            if (isset($data["is_default"]) && $data["is_default"] === true) {
-                return [
-                    "from_db" => false,
-                    "data"    => $data
-                ];
-            }
-
-            // CASE 2: Real DB data
-            if (!empty($data)) {
-                return [
-                    "from_db" => true,
-                    "data"    => $data
-                ];
-            }
-
-            // CASE 3: Nothing returned → fallback
-            return [
-                "from_db" => false,
-                "data"    => $this->fallback($label)
-            ];
-        } catch (Throwable $e) {
-            app_log("HomeController: Failed loading section {$label}: " . $e->getMessage(), "warning");
-            
-            // return ["from_db" => false] + $this->fallback($label);
-            return [
-                "from_db" => false,
-                "data"    => $this->fallback($label)
-            ];
+        if (!is_array($data) || empty($data) || isset($data["is_default"])) {
+            return ["from_db" => false, "data" => $data ?: []];
         }
+
+        return ["from_db" => true, "data" => $data];
     }
 
-
     /* ============================================================
-     * FALLBACKS
+     * PROJECT MODEL HAS EXPLICIT SOURCE
      * ============================================================ */
-
-    /**
-     * Returns minimal guaranteed-safe fallback for each section
-     */
-    private function fallback(string $section): array
+    private function wrapProject(array $payload): array
     {
-        return match ($section) {
-
-            "home" => [
-                "hero_heading"      => "Welcome to my Portfolio",
-                "hero_subheading"   => "Full Stack Developer",
-                "hero_description"  => "Building applications with clean architecture and performance.",
-                "background_image"  => IMG_URL . "default-hero-bg.jpg",
-                "background_lottie" => "https://assets10.lottiefiles.com/packages/lf20_q5pk6p1k.json",
-                "cta_primary_text"  => "View Projects",
-                "cta_primary_link"  => "/projects",
-                "cta_secondary_text"=> "Download CV",
-                "cta_secondary_link"=> "/downloadcv",
-                "cv_file_path"      => "/downloads/Yogesh_Lilake_Resume.pdf",
-                "is_active"         => 1,
-                "is_default"        => true
-            ],
-
-            "about" => [
-                "title"       => "About Me",
-                "content"     => "Hi, I'm Yogesh — Full Stack Developer specializing in scalable systems.",
-                "is_default"  => true
-            ],
-
-            "contact" => [
-                "title"       => "Contact",
-                "subtitle"    => "Let's build something amazing.",
-                "button_text" => "Email Me",
-                "button_link" => "mailto:contact@example.com",
-                "is_default"  => true
-            ],
-
-            default => ["is_default" => true]
-        };
+        return [
+            "from_db" => ($payload["source"] ?? "") === "db",
+            "data"    => $payload["data"] ?? []
+        ];
     }
 
 
     /* ============================================================
-     * REAL DATA CHECK
-     * Prevents cache poisoning & ensures non-empty payload
+     * PAGE CACHE POLICY
      * ============================================================ */
 
     private function hasRealData(array $data): bool
     {
         foreach ($data as $section) {
             // fallback sections contain "is_default" OR empty
-            if (!is_array($section) || (isset($section["from_db"]) && $section["from_db"] !== true)) {
+            if (($section["from_db"] ?? false) !== true) {
                 return false; // fallback → do not cache
             }
         }

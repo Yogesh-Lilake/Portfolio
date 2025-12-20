@@ -18,12 +18,15 @@ class ProjectModel {
     /* ============================================================
     * FEATURED PROJECTS (Home page)
     * ============================================================ */
-    public function getFeatured()
+    public function getFeatured(): array
     {
         $cacheKey = "featured_projects";
 
         if ($cache = CacheService::load($cacheKey)) {
-            return $cache;
+            return [
+                "source" => "db",
+                "data"   => $cache
+            ];
         }
 
         try {
@@ -33,7 +36,11 @@ class ProjectModel {
 
             if (!empty($rows)) {
                 CacheService::save($cacheKey, $rows);
-                return $rows;
+
+                return [
+                    "source" => "db",
+                    "data"   => $rows
+                ];
             }
 
         } catch (Throwable $e) {
@@ -43,20 +50,21 @@ class ProjectModel {
         /** ----------------------------------------------------
         * C. TRY DEFAULT JSON FILE
         * ----------------------------------------------------*/
-        $jsonFile = HOME_PROJECTS_DEFAULT_FILE;
-
-        if (file_exists($jsonFile)) {
-            $json = json_decode(file_get_contents($jsonFile), true);
-            if (!empty($json) && is_array($json)) {
-                return $json;
+        if (file_exists(HOME_PROJECTS_DEFAULT_FILE)) {
+            $json = json_decode(file_get_contents(HOME_PROJECTS_DEFAULT_FILE), true);
+            if (!empty($json)) {
+                return [
+                    "source" => "json",
+                    "data"   => $json
+                ];
             }
         }
 
-        /** ----------------------------------------------------
-        * D. HARD-CODED FALLBACK
-        * ----------------------------------------------------*/
-        return $this->defaultFeatured();
-
+        /* ---------- HARD FALLBACK ---------- */
+        return [
+            "source" => "fallback",
+            "data"   => $this->defaultFeatured()
+        ];
     }
 
     /**
