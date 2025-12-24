@@ -65,7 +65,7 @@ $extra_js   = $extra_js ?? [];
 
 </head>
 
-<body class="bg-darkbg text-color font-sans scroll-smooth min-h-screen flex flex-col">
+<body class="<?= ($data['safe_mode'] ?? false) ? 'safe-mode' : '' ?> bg-darkbg text-color font-sans scroll-smooth min-h-screen flex flex-col">
 
     <!-- TOAST BOX CONTAINER -->
     <div id="toastBox"></div>

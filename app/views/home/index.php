@@ -2,6 +2,7 @@
 /**
  * HOME PAGE VIEW
  * Receives $data from HomeController
+ * Safe-mode aware
  */
 
 // Extract formatted sections (controller guarantees structure)
@@ -11,6 +12,8 @@ $skills   = $data["skills"]["data"] ?? [];
 $projects = $data["projects"]["data"] ?? [];
 $contact  = $data["contact"]["data"] ?? [];
 
+// verify safe mode
+$safeMode = $data['safe_mode'] ?? false;
 
 // Page metadata
 $page_title = "Yogesh Portfolio | Full Stack Developer";
@@ -20,10 +23,16 @@ $custom_js  = [INDEX_JS];
 require_once LAYOUT_HEAD_FILE;
 ?>
 
+<?php if ($safeMode): ?>
+    <div class="bg-yellow-500 text-black text-center py-3 px-4 font-semibold">
+        Limited Functionality Mode — Some features are temporarily unavailable.
+    </div>
+<?php endif; ?>
+
 <!-- HERO SECTION -->
 <section class="text-center py-24 sm:py-28 relative overflow-hidden parallax-bg"
     style="background-image:url('<?= field($home, 'background_image') ?>')">
-    
+
     <lottie-player 
         src="<?= field($home, 'background_lottie') ?>"
         background="transparent"
@@ -31,118 +40,146 @@ require_once LAYOUT_HEAD_FILE;
         style="position:absolute; inset:0; opacity:0.15; z-index:-1;">
     </lottie-player>
 
-    <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 text-accent reveal">
+    <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 text-accent <?= $safeMode ? '' : 'reveal' ?>">
         <?= $home['hero_heading'] ?>
     </h1>
 
-    <p class="text-base sm:text-lg md:text-xl text-gray-300 mb-8 reveal max-w-2xl mx-auto">
+    <p class="text-base sm:text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto <?= $safeMode ? '' : 'reveal' ?>">
         <?= field($home, 'hero_subheading') ?>
     </p>
 
-    <p class="text-gray-400 max-w-2xl mx-auto mb-10 reveal">
-        <?= $home['hero_description'] ?? '' ?>
+    <p class="text-gray-400 max-w-2xl mx-auto mb-10 <?= $safeMode ? '' : 'reveal' ?>">
+        <?= field($home, 'hero_description') ?>
     </p>
 
-    <div class="flex flex-wrap justify-center gap-4 reveal">
+    <div class="flex flex-wrap justify-center gap-4 <?= $safeMode ? '' : 'reveal' ?>">
         <a href="<?= url($home['cta_primary_link'] ?? '') ?>"
-            class="bg-accent text-darkbg px-6 py-3 rounded-full font-semibold hover:bg-red-600 transition">
+           class="bg-accent text-darkbg px-6 py-3 rounded-full font-semibold hover:bg-red-600 transition">
             <?= field($home, 'cta_primary_text') ?>
         </a>
 
-        <button onclick="ajaxDownload('<?= url($home['cta_secondary_link'] ?? '') ?>', 'Yogesh_Lilake_Resume.pdf')"
-            class="btn border border-accent text-accent px-6 py-3 rounded-full font-semibold hover:bg-accent hover:text-darkbg transition">
-            <?= field($home, 'cta_secondary_text') ?>
-        </button>
+        <?php if (!$safeMode): ?>
+            <button onclick="ajaxDownload('<?= url($home['cta_secondary_link'] ?? '') ?>', 'Yogesh_Lilake_Resume.pdf')"
+                class="btn border border-accent text-accent px-6 py-3 rounded-full font-semibold hover:bg-accent hover:text-darkbg transition">
+                <?= field($home, 'cta_secondary_text') ?>
+            </button>
+        <?php endif; ?>
     </div>
 </section>
 
-<!-- ABOUT -->
-<section class="py-20 px-4 sm:px-10 lg:px-20 text-center bg-[#111827] reveal-left">
-    <h2 class="text-3xl sm:text-4xl font-bold mb-8 text-accent">
-        <?= safe($about['title']) ?>
-    </h2>
+<?php if ($safeMode): ?>
+    <!-- SAFE MODE QUICK LINKS (TRUST + NAVIGATION) -->
+    <section class="py-12 text-center text-gray-400">
+        <p class="mb-4">You can still explore:</p>
+        <div class="flex justify-center gap-6 font-medium">
+            <a href="<?= url('about') ?>" class="hover:text-accent">About</a>
+            <a href="<?= url('projects') ?>" class="hover:text-accent">Projects</a>
+            <a href="<?= url('notes') ?>" class="hover:text-accent">Notes</a>
+            <a href="<?= url('contact') ?>" class="hover:text-accent">Contact</a>
+        </div>
+    </section>
+<?php endif; ?>
 
-    <p class="max-w-3xl mx-auto text-gray-300 leading-relaxed text-base sm:text-lg lg:text-xl">
-        <?= $about['content'] ?>
-    </p>
-</section>
+<!-- ABOUT -->
+<?php if (!$safeMode && !empty($about)): ?>
+    <section class="py-20 px-4 sm:px-10 lg:px-20 text-center bg-[#111827] reveal-left">
+        <h2 class="text-3xl sm:text-4xl font-bold mb-8 text-accent">
+            <?= safe($about['title']) ?>
+        </h2>
+
+        <p class="max-w-3xl mx-auto text-gray-300 leading-relaxed text-base sm:text-lg lg:text-xl">
+            <?= $about['content'] ?>
+        </p>
+    </section>
+<?php endif; ?>
 
 <!-- SKILLS SECTION -->
-<section class="py-20 px-4 sm:px-10 lg:px-20 text-center reveal-right">
-    <div class="max-w-6xl mx-auto">
-        <h3 class="text-3xl sm:text-4xl font-bold mb-10 text-accent">Skills</h3>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 sm:gap-6">
+<?php if (!$safeMode && !empty($skills)): ?>
+    <section class="py-20 px-4 sm:px-10 lg:px-20 text-center reveal-right">
+        <div class="max-w-6xl mx-auto">
+            <h3 class="text-3xl sm:text-4xl font-bold mb-10 text-accent">Skills</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 sm:gap-6">
 
-            <?php if (empty($skills)): ?>
-                <p>No skills found.</p>
+                <?php if (empty($skills)): ?>
+                    <p>No skills found.</p>
+                <?php else: ?>
+                    <?php foreach ($skills as $skill): ?>
+                        <div class="p-4 bg-[#1E293B] rounded-xl hover:bg-accent hover:text-darkbg transition transform hover:scale-105">
+                            <i class="<?= safe($skill['icon_class'] ?? '') ?> <?= safe($skill['color_class'] ?? '') ?> 
+                                text-3xl sm:text-4xl md:text-5xl mb-3"></i>
+
+                            <h4 class="font-semibold"><?= field($skill, 'skill_name') ?></h4>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+
+            </div>
+        </div>
+    </section>
+<?php endif; ?>
+
+<!-- PROJECTS -->
+<?php if (!$safeMode): ?>
+    <section class="py-20 px-4 sm:px-10 lg:px-20 bg-[#111827] reveal-left">
+        <h2 class="text-3xl sm:text-4xl font-bold mb-12 text-center text-accent">Featured Projects</h2>
+
+        <div class="grid gap-8 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 max-w-screen-xl mx-auto">
+
+            <?php if (empty($projects)): ?>
+                <p>No featured projects found.</p>
             <?php else: ?>
-                <?php foreach ($skills as $skill): ?>
-                    <div class="p-4 bg-[#1E293B] rounded-xl hover:bg-accent hover:text-darkbg transition transform hover:scale-105">
-                        <i class="<?= safe($skill['icon_class'] ?? '') ?> <?= safe($skill['color_class'] ?? '') ?> 
-                           text-3xl sm:text-4xl md:text-5xl mb-3"></i>
+                <?php foreach ($projects as $project): ?>
+                    <div class="bg-[#1E293B] rounded-xl overflow-hidden shadow-lg hover:scale-105 transition">
 
-                        <h4 class="font-semibold"><?= field($skill, 'skill_name') ?></h4>
+                        <img src="<?= asset($project['image_path']) ?>" 
+                            alt="<?= field($project, 'title') ?>" 
+                            class="aspect-video w-full object-cover"
+                            loading="lazy"
+                            onerror="this.onerror=null;this.src='<?= asset('project-placeholder.png') ?>';">
+
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2"><?= field($project, 'title') ?></h3>
+                            <p class="text-gray-400 text-sm mb-4"><?= field($project, 'description') ?></p>
+
+                            <a href="<?= url('projects/' . $project['slug']) ?>" class="text-accent hover:underline font-semibold">
+                                View →
+                            </a>
+                        </div>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
-
         </div>
-    </div>
-</section>
 
-<!-- PROJECTS -->
-<section class="py-20 px-4 sm:px-10 lg:px-20 bg-[#111827] reveal-left">
-    <h2 class="text-3xl sm:text-4xl font-bold mb-12 text-center text-accent">Featured Projects</h2>
-
-    <div class="grid gap-8 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 max-w-screen-xl mx-auto">
-
-        <?php if (empty($projects)): ?>
-            <p>No featured projects found.</p>
-        <?php else: ?>
-            <?php foreach ($projects as $project): ?>
-                <div class="bg-[#1E293B] rounded-xl overflow-hidden shadow-lg hover:scale-105 transition">
-
-                    <img src="<?= asset($project['image_path']) ?>" 
-                         alt="<?= field($project, 'title') ?>" 
-                         class="aspect-video w-full object-cover"
-                         loading="lazy"
-                         onerror="this.onerror=null;this.src='<?= asset('project-placeholder.png') ?>';">
-
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2"><?= field($project, 'title') ?></h3>
-                        <p class="text-gray-400 text-sm mb-4"><?= field($project, 'description') ?></p>
-
-                        <a href="<?= url('projects/' . $project['slug']) ?>" class="text-accent hover:underline font-semibold">
-                            View →
-                        </a>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </div>
-
-    <div class="text-center mt-10">
-        <a href="<?= url('projects') ?>"
-           class="border border-accent text-accent px-6 py-3 rounded-full hover:bg-accent hover:text-darkbg transition">
-            See All Projects
-        </a>
-    </div>
-</section>
+        <div class="text-center mt-10">
+            <a href="<?= url('projects') ?>"
+            class="border border-accent text-accent px-6 py-3 rounded-full hover:bg-accent hover:text-darkbg transition">
+                See All Projects
+            </a>
+        </div>
+    </section>
+<?php else: ?>
+    <section class="py-20 text-center text-gray-400">
+        <h2 class="text-2xl font-bold mb-4">Projects Temporarily Unavailable</h2>
+        <p>Please check back shortly.</p>
+    </section>
+<?php endif; ?>
 
 <!-- CONTACT -->
-<section class="py-20 px-4 sm:px-10 lg:px-20 text-center reveal-right">
-    <h3 class="text-3xl sm:text-4xl font-bold mb-8 text-accent">
-        <?= field($contact, 'title') ?>
-    </h3>
+<?php if (!$safeMode && !empty($contact)): ?>
+    <section class="py-20 px-4 sm:px-10 lg:px-20 text-center reveal-right">
+        <h3 class="text-3xl sm:text-4xl font-bold mb-8 text-accent">
+            <?= field($contact, 'title') ?>
+        </h3>
 
-    <p class="text-gray-300 mb-10 max-w-xl sm:max-w-2xl mx-auto text-base sm:text-lg">
-        <?= field($contact, 'subtitle') ?>
-    </p>
+        <p class="text-gray-300 mb-10 max-w-xl sm:max-w-2xl mx-auto text-base sm:text-lg">
+            <?= field($contact, 'subtitle') ?>
+        </p>
 
-    <a href="<?= url($contact['button_link'] ?? '') ?>" 
-       class="bg-accent text-darkbg px-6 py-3 rounded-full font-semibold hover:bg-red-600 transition">
-       <?= field($contact, 'button_text') ?>
-    </a>
-</section>
+        <a href="<?= url($contact['button_link'] ?? '') ?>" 
+            class="bg-accent text-darkbg px-6 py-3 rounded-full font-semibold hover:bg-red-600 transition">
+            <?= field($contact, 'button_text') ?>
+        </a>
+    </section>
+<?php endif; ?>
 
 <?php require_once LAYOUT_FOOT_FILE; ?>

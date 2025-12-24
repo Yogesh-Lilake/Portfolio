@@ -32,6 +32,7 @@ class HomeController extends Controller
     /**
      * Home page controller
      * Returns ALL SECTIONS as cached + DB fallback data.
+     * Safe-mode aware
      */
     public function index()
     {
@@ -42,6 +43,7 @@ class HomeController extends Controller
              * --------------------------------------------------- */
             /* Cache → whole page */
             if ($cached = CacheService::load($this->cacheKey)) {
+                $cached['safe_mode'] = false;
                 return $this->view("home/index", $cached);
             }
 
@@ -49,6 +51,8 @@ class HomeController extends Controller
              * 2. SAFE DB LOAD (per section)
              * --------------------------------------------------- */
             $data = [
+                "safe_mode" => false,
+
                 "home"     => $this->wrap($this->home->get(), "home"),
                 "about"    => $this->wrap($this->about->get(), "about"),
                 "skills"   => $this->wrap($this->skills->all(), "skills"),
@@ -68,13 +72,24 @@ class HomeController extends Controller
 
         } catch (Throwable $e) {
 
-            /* ---------------------------------------------------
-             * 4. PAGE-WIDE EMERGENCY FALLBACK
-             * --------------------------------------------------- */
-            app_log("HomeController@index FAILED: " . $e->getMessage(), "error");
+            /* -----------------------------------------
+             * 4. SAFE MODE ACTIVATION
+             * ----------------------------------------- */
+            app_log(
+                "SAFE MODE ACTIVATED — HomeController@index: " . $e->getMessage(),
+                "critical"
+            );
 
             return $this->view("home/index", [
-                "home"     => ["from_db" => false, "data" => []],
+                "safe_mode" => true,
+
+                // Hero must always exist
+                "home"     => [
+                    "from_db" => false,
+                    "data"    => $this->home->defaultHome()
+                ],
+
+                // Other sections disabled
                 "about"    => ["from_db" => false, "data" => []],
                 "skills"   => ["from_db" => false, "data" => []],
                 "projects" => ["from_db" => false, "data" => []],
@@ -114,8 +129,9 @@ class HomeController extends Controller
 
     private function hasRealData(array $data): bool
     {
-        foreach ($data as $section) {
-            // fallback sections contain "is_default" OR empty
+        foreach ($data as $key => $section) {
+            if ($key === "safe_mode") continue;
+
             if (($section["from_db"] ?? false) !== true) {
                 return false; // fallback → do not cache
             }

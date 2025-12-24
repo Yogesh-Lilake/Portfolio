@@ -1,5 +1,9 @@
 </main>
 
+    <?php
+        // Ensure $data always exists for components
+        $data = $data ?? [];
+    ?>
     <!-- AUTO FOOTER -->
     <?php include COMPONENT_FOOTER_FILE; ?>
 
