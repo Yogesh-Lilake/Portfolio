@@ -30,6 +30,7 @@ class ContactController extends Controller
         try {
             // 1) Try full page cache first
             if ($cached = CacheService::load($this->cacheKey)) {
+                $cached['safe_mode'] = false;
                 return $this->view("pages/contact", $cached);
             }
 
@@ -50,15 +51,16 @@ class ContactController extends Controller
             return $this->view("pages/contact", $sections);
 
         } catch (Throwable $e) {
-            app_log("ContactController@index failed: " . $e->getMessage(), "error");
+            app_log("SAFE MODE — ContactController@index", "critical");
 
             // Emergency fallback - return guaranteed non-empty defaults from model
             return $this->view("pages/contact", [
-                "hero"    => ["from_db" => false, "data" => $this->contact->fallback("hero")],
-                "info"    => ["from_db" => false, "data" => $this->contact->fallback("info")],
-                "socials" => ["from_db" => false, "data" => $this->contact->fallback("socials")],
-                "map"     => ["from_db" => false, "data" => $this->contact->fallback("map")],
-                "toast"   => ["from_db" => false, "data" => $this->contact->fallback("toast")],
+                "safe_mode" => true,
+                "hero"      => ["data" => $this->contact->fallback("hero")],
+                "info"      => ["data" => []],
+                "socials"   => ["data" => []],
+                "map"       => ["data" => []],
+                "toast"     => ["data" => []],
             ]);
         }
     }

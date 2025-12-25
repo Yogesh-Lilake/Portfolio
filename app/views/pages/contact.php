@@ -1,4 +1,8 @@
 <?php
+/**
+ * CONTACT PAGE
+ * Safe-mode aware
+ */
 
 // Normalize sections (guaranteed keys due to controller emergency fallback)
 $heroSection    = $data['hero']['data']    ?? [];
@@ -7,13 +11,15 @@ $socialsSection = $data['socials']['data'] ?? [];
 $mapSection     = $data['map']['data']     ?? [];
 $toastMessage = null;  // JS will handle toast from API responses
 
+$safeMode = $data['safe_mode'] ?? false;
+
 $page_title = "Contact | Yogesh Lilake";
 $custom_css = [CONTACT_CSS];
-$custom_js  = [CONTACT_JS];
+$custom_js  = $safeMode ? [] : [CONTACT_JS];
 $extra_css  = [AOS_CSS];
 
 // If RECAPTCHA_SITE_KEY is set, include the recaptcha script
-$extra_js   = [AOS_JS];
+$extra_js   = $safeMode ? [] : [AOS_JS];
 if (defined('RECAPTCHA_SITE_KEY') && RECAPTCHA_SITE_KEY) {
     $extra_js[] = "https://www.google.com/recaptcha/api.js?render=" . RECAPTCHA_SITE_KEY;
 }
@@ -21,8 +27,14 @@ if (defined('RECAPTCHA_SITE_KEY') && RECAPTCHA_SITE_KEY) {
 require_once LAYOUT_HEAD_FILE;
 ?>
 
-<!-- Hero Section -->
-<section class="text-center py-16 md:py-24 px-4 sm:px-8" data-aos="fade-up" data-aos-duration="1000">
+<?php if ($safeMode): ?>
+  <div class="bg-yellow-500 text-black text-center py-3 px-4 font-semibold">
+    Contact form temporarily disabled. Please use direct email.
+  </div>
+<?php endif; ?>
+
+<!-- HERO -->
+<section class="text-center py-16 md:py-24 px-4 sm:px-8" data-aos= <?= $safeMode ? '' : 'fade-up' ?> data-aos-duration= <?= $safeMode ? '' : '1000' ?>>
   <h1 class="text-3xl sm:text-5xl lg:text-6xl font-bold mb-6 text-white leading-snug">
     <?= htmlspecialchars($heroSection['heading'] ?? "Let’s Build Something Great Together 🚀") ?>
   </h1>
@@ -32,7 +44,7 @@ require_once LAYOUT_HEAD_FILE;
   </p>
 
   <?php if (!empty($heroSection['hero_lottie_url'])): ?>
-    <div class="mt-10 flex justify-center" data-aos="zoom-in" data-aos-delay="200">
+    <div class="mt-10 flex justify-center" data-aos= <?= $safeMode ? '' : 'zoom-in' ?> data-aos-delay= <?= $safeMode ? '' : '200' ?>>
       <?php $asset = $heroSection['hero_lottie_url']; ?>
       <?php if (str_starts_with($asset, 'http') || str_starts_with($asset, 'https')): ?>
         <lottie-player src="<?= htmlspecialchars($asset) ?>" background="transparent" speed="1" style="width: clamp(160px, 35vw, 260px); height: auto;" loop autoplay></lottie-player>
@@ -49,44 +61,51 @@ require_once LAYOUT_HEAD_FILE;
   <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">
 
     <!-- Left: Contact Form -->
-    <div class="bg-darkbg p-6 sm:p-8 rounded-3xl shadow-lg border border-gray-700" data-aos="fade-right">
+    <div class="bg-darkbg p-6 sm:p-8 rounded-3xl shadow-lg border border-gray-700" data-aos= <?= $safeMode ? '' : 'fade-right' ?>>
       <h2 class="text-2xl sm:text-3xl font-semibold mb-6 text-accent">Send a Message</h2>
 
-      <form id="contact-form" class="space-y-5" novalidate>
-        <div>
-          <label class="block text-sm mb-2">Your Name</label>
-          <input type="text" name="name" required class="w-full px-4 py-3 rounded-lg" autocomplete="name">
-        </div>
+      <?php if ($safeMode): ?>
+        <p class="text-gray-400">
+          Email me directly at
+          <strong class="text-accent">hello@example.com</strong>
+        </p>
+      <?php else: ?>
+        <form id="contact-form" class="space-y-5">
+          <div>
+            <label class="block text-sm mb-2">Your Name</label>
+            <input type="text" name="name" required class="w-full px-4 py-3 rounded-lg" autocomplete="name">
+          </div>
 
-        <div>
-          <label class="block text-sm mb-2">Email Address</label>
-          <input type="email" name="email" required class="w-full px-4 py-3 rounded-lg" autocomplete="email">
-        </div>
+          <div>
+            <label class="block text-sm mb-2">Email Address</label>
+            <input type="email" name="email" required class="w-full px-4 py-3 rounded-lg" autocomplete="email">
+          </div>
 
-        <div>
-          <label class="block text-sm mb-2">Message</label>
-          <textarea name="message" rows="5" required class="w-full px-4 py-3 rounded-lg resize-none"></textarea>
-        </div>
+          <div>
+            <label class="block text-sm mb-2">Message</label>
+            <textarea name="message" rows="5" required class="w-full px-4 py-3 rounded-lg resize-none"></textarea>
+          </div>
 
-        <!-- Honeypot field (hidden to users, visible to bots) -->
-        <div style="display:none !important; visibility:hidden;">
-          <label>Leave this field empty</label>
-          <input type="text" name="hp_name" value="" autocomplete="off">
-        </div>
+          <!-- Honeypot field (hidden to users, visible to bots) -->
+          <div style="display:none !important; visibility:hidden;">
+            <label>Leave this field empty</label>
+            <input type="text" name="hp_name" value="" autocomplete="off">
+          </div>
 
-        <!-- reCAPTCHA token holder (filled by JS if available) -->
-        <input type="hidden" name="recaptcha_token" id="recaptcha_token" value="">
+          <!-- reCAPTCHA token holder (filled by JS if available) -->
+          <input type="hidden" name="recaptcha_token" id="recaptcha_token" value="">
 
-        <button id="sendBtn" type="submit" class="w-full bg-accent hover:bg-red-500 text-white font-semibold py-3 rounded-lg transition duration-300 hover:scale-105">
-          <span class="btn-text">Send Message</span>
-          <span class="btn-loading hidden">Sending...</span>
-          <i class="fa-solid fa-paper-plane ml-2"></i>
-        </button>
-      </form>
+          <button id="sendBtn" type="submit" class="w-full bg-accent hover:bg-red-500 text-white font-semibold py-3 rounded-lg transition duration-300 hover:scale-105">
+            <span class="btn-text">Send Message</span>
+            <span class="btn-loading hidden">Sending...</span>
+            <i class="fa-solid fa-paper-plane ml-2"></i>
+          </button>
+        </form>
+      <?php endif; ?>
     </div>
 
     <!-- Right: Contact Info -->
-    <div class="text-gray-300 space-y-6" data-aos="fade-left" data-aos-delay="150">
+    <div class="text-gray-300 space-y-6" data-aos= <?= $safeMode ? '' : 'fade-left' ?> data-aos-delay= <?= $safeMode ? '' : '150' ?>>
       <h3 class="text-2xl sm:text-3xl font-semibold text-white">Let’s Talk!</h3>
 
       <p class="text-gray-400"><?= htmlspecialchars($heroSection['subheading'] ?? '') ?></p>
@@ -118,8 +137,7 @@ require_once LAYOUT_HEAD_FILE;
     </div>
   </div>
 
-  <!-- Map -->
-  <?php if (!empty($mapSection['map_embed_url'])): ?>
+  <?php if (!$safeMode && !empty($mapSection['map_embed_url'])): ?>
     <div class="mt-16 rounded-2xl overflow-hidden shadow-lg aspect-[16/9]" data-aos="fade-up" data-aos-delay="200">
       <iframe src="<?= htmlspecialchars($mapSection['map_embed_url']) ?>" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
     </div>
@@ -129,5 +147,18 @@ require_once LAYOUT_HEAD_FILE;
 
 <!-- Toast -->
 <div id="toast"></div>
+
+<?php if ($safeMode): ?>
+  <!-- SAFE MODE QUICK LINKS (TRUST + NAVIGATION) -->
+  <section class="py-12 text-center text-gray-400">
+    <p class="mb-4">You can still explore:</p>
+    <div class="flex justify-center gap-6 font-medium">
+      <a href="<?= url('') ?>" class="hover:text-accent">Home</a>
+      <a href="<?= url('about') ?>" class="hover:text-accent">About</a>
+      <a href="<?= url('projects') ?>" class="hover:text-accent">Projects</a>
+      <a href="<?= url('notes') ?>" class="hover:text-accent">Notes</a>
+    </div>
+  </section>
+<?php endif; ?>
 
 <?php require_once LAYOUT_FOOT_FILE; ?>

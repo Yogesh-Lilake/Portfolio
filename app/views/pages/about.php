@@ -11,18 +11,26 @@ $experience = $data["experience"]["data"]  ?? [];
 $education  = $data["education"]["data"]   ?? [];
 $stats      = $data["stats"]["data"]       ?? [];
 
+$safeMode = $data['safe_mode'] ?? false;
+
 // Page meta + assets
 $page_title = "About | " . SITE_TITLE;
 $custom_css = [ABOUT_CSS];
-$custom_js  = [ABOUT_JS];
+$custom_js  = $safeMode ? [] : [ABOUT_JS];
 
 // Load <head> + header
 require_once LAYOUT_HEAD_FILE;
 
 ?>
 
+<?php if ($safeMode): ?>
+    <div class="bg-yellow-500 text-black text-center py-3 px-4 font-semibold">
+        Limited Functionality Mode — Some details are temporarily unavailable.
+    </div>
+<?php endif; ?>
+
 <!-- HERO SECTION -->
-<section class="relative py-20 sm:py-24 lg:py-28 overflow-hidden text-center fade-up">
+<section class="relative py-20 sm:py-24 lg:py-28 overflow-hidden text-center <?= $safeMode ? '' : 'fade-up' ?>">
 
     <lottie-player
         src="<?= htmlspecialchars($hero['animation_url'] ?? 'https://assets10.lottiefiles.com/packages/lf20_jcikwtux.json') ?>"
@@ -32,14 +40,29 @@ require_once LAYOUT_HEAD_FILE;
         style="position:absolute; inset:0; opacity:<?= $hero['background_opacity'] ?? 0.15 ?>; z-index:-1;">
     </lottie-player>
 
-    <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 text-accent fade-up">
+    <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 text-accent <?= $safeMode ? '' : 'fade-up' ?>">
         <?= htmlspecialchars($hero['title'] ?? "About") ?> <span class="text-white">Me</span>
     </h1>
 
-    <p class="text-gray-300 max-w-2xl mx-auto text-base sm:text-lg md:text-xl fade-up">
+    <p class="text-gray-300 max-w-2xl mx-auto text-base sm:text-lg md:text-xl <?= $safeMode ? '' : 'fade-up' ?>">
         <?= htmlspecialchars($hero['subtitle'] ?? "") ?>
     </p>
 </section>
+
+<?php if ($safeMode): ?>
+    <!-- SAFE MODE QUICK LINKS -->
+    <section class="py-12 text-center text-gray-400">
+        <p class="mb-4">You can still explore:</p>
+        <div class="flex justify-center gap-6 font-medium">
+            <a href="<?= url('') ?>" class="hover:text-accent">Home</a>
+            <a href="<?= url('projects') ?>" class="hover:text-accent">Projects</a>
+            <a href="<?= url('notes') ?>" class="hover:text-accent">Notes</a>
+            <a href="<?= url('contact') ?>" class="hover:text-accent">Contact</a>
+        </div>
+    </section>
+<?php endif; ?>
+
+<?php if (!$safeMode): ?>
 
 
 <!-- ABOUT CONTENT -->
@@ -174,5 +197,7 @@ require_once LAYOUT_HEAD_FILE;
         <?php endforeach; ?>
     </div>
 </section>
+
+<?php endif; ?>
 
 <?php require_once LAYOUT_FOOT_FILE; ?>

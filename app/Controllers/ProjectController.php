@@ -41,6 +41,7 @@ class ProjectController extends Controller
              * 1. FULL PAGE CACHE
              * --------------------------------------------------- */
             if ($cached = CacheService::load($this->cacheKey)) {
+                $cached['safe_mode'] = false;
                 return $this->view("pages/projects", $cached);
             }
 
@@ -67,6 +68,7 @@ class ProjectController extends Controller
             // ensure shape even if fallback returned different shaped data
             $proj = $projectData["data"];
             $final = [
+                "safe_mode" => false,
                 "projects"   => $proj["items"] ?? [],
                 "techList"   => $techData["data"] ?? [],
                 "page"       => $proj["page"] ?? 1,
@@ -89,18 +91,16 @@ class ProjectController extends Controller
 
         } catch (Throwable $e) {
 
-            app_log("ProjectController@index ERROR: " . $e->getMessage(), "error");
+            app_log("SAFE MODE — ProjectController@index: " . $e->getMessage(), "critical");
 
             return $this->view("pages/projects", [
-                "projects"   => $this->projects->defaultProjects(),
-                "techList"   => $this->projects->defaultTechList(),
+                "safe_mode"  => true,
+                "projects"   => [],
+                "techList"   => [],
                 "page"       => 1,
                 "totalPages" => 1,
-                "total"      => count($this->projects->defaultProjects()),
-                "filters"    => [
-                    "tech" => null,
-                    "featured" => false
-                ],
+                "total"      => 0,
+                "filters"    => [],
             ]);
         }
     }

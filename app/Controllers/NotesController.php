@@ -22,6 +22,7 @@ class NotesController extends Controller
         try {
             // 1. Try reading cache
             if ($cached = CacheService::load($this->cacheKey)) {
+                $cached['safe_mode'] = false;
                 return $this->view("pages/notes", $cached);
             }
 
@@ -42,13 +43,14 @@ class NotesController extends Controller
 
         } catch (Throwable $e) {
 
-            app_log("NotesController@index failed: " . $e->getMessage(), "error");
+            app_log("SAFE MODE ACTIVITED — NotesController@index", "critical");
 
             return $this->view("pages/notes", [
-                "notes"        => ["data" => []],
-                "categories"   => ["data" => []],
-                "tags"         => ["data" => []],
-                "pinned_notes" => ["data" => []],
+                "safe_mode"     => true,
+                "notes"         => ["data" => []],
+                "categories"    => ["data" => []],
+                "tags"          => ["data" => []],
+                "pinned_notes"  => ["data" => []],
             ]);
         }
     }

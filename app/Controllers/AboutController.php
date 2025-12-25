@@ -41,6 +41,7 @@ class AboutController extends Controller
              * 1. Try loading full page from cache
              * --------------------------------------------------- */
             if ($cached = CacheService::load($this->cacheKey)) {
+                $cached['safe_mode'] = false;
                 return $this->view("pages/about", $cached); // Return cached version immediately
             }
 
@@ -53,6 +54,7 @@ class AboutController extends Controller
              *   ]
              * --------------------------------------------------- */
             $data = [
+                "safe_mode" => false,
                 "hero"       => $this->safeLoad(fn() => $this->about->getHero(),       "hero"),
                 "content"    => $this->safeLoad(fn() => $this->about->getContent(),    "content"),
                 "skills"     => $this->safeLoad(fn() => $this->about->getSkills(),     "skills"),
@@ -73,18 +75,26 @@ class AboutController extends Controller
 
         } catch (Throwable $e) {
 
-            app_log("AboutController@index failed: " . $e->getMessage(), "error");
+            app_log(
+                "SAFE MODE ACTIVATED — AboutController@index: " . $e->getMessage(),
+                "critical"
+            );
 
             /** ---------------------------------------------------
              * D. Emergency fallback (controller-level protection)
              * --------------------------------------------------- */
-            return $this->view("pages/about",[
-                "hero"       => ["data" => $this->about->defaultHero()],
-                "content"    => ["data" => $this->about->defaultContent()],
-                "skills"     => ["data" => $this->about->defaultSkills()],
-                "experience" => ["data" => $this->about->defaultExperience()],
-                "education"  => ["data" => $this->about->defaultEducation()],
-                "stats"      => ["data" => $this->about->defaultStats()],
+            return $this->view("pages/about", [
+                "safe_mode" => true,
+
+                // Hero ALWAYS exists
+                "hero"       => ["from_db" => false, "data" => $this->about->defaultHero()],
+
+                // Disable rest
+                "content"    => ["from_db" => false, "data" => []],
+                "skills"     => ["from_db" => false, "data" => []],
+                "experience" => ["from_db" => false, "data" => []],
+                "education"  => ["from_db" => false, "data" => []],
+                "stats"      => ["from_db" => false, "data" => []],
             ]);
         }
     }
