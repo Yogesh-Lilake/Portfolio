@@ -9,7 +9,7 @@ class FooterCacheValidator implements CacheValidatorInterface
             'v1_footer_settings',
             'v1_footer_quick_links',
             'v1_footer_social_links'
-        ]);
+        ], true);
     }
 
     public function validate(array $payload): ?string
@@ -32,10 +32,18 @@ class FooterCacheValidator implements CacheValidatorInterface
                 }
             }
 
+            // UI fields → NO HTML
+            foreach (['brand_name', 'developer_name', 'accent_color'] as $field) {
+                if ($this->containsHtml($payload[$field])) {
+                    return "DC-05 Footer settings unsafe HTML detected in '{$field}'";
+                }
+            }
+
             if (trim($payload['brand_name']) === '') {
                 return "DC-05 Footer settings semantic violation (empty brand_name)";
             }
 
+            // footer_description intentionally allows HTML
             return null;
         }
 
@@ -49,8 +57,16 @@ class FooterCacheValidator implements CacheValidatorInterface
             }
 
             foreach ($payload as $index => $item) {
+
                 if (!isset($item['label'], $item['url'])) {
                     return "DC-04 Footer quick links schema corruption at index {$index}";
+                }
+
+                if (
+                    $this->containsHtml($item['label']) ||
+                    $this->containsHtml($item['url'])
+                ) {
+                    return "DC-05 Footer quick links unsafe HTML at index {$index}";
                 }
 
                 if (trim($item['label']) === '' || trim($item['url']) === '') {
@@ -67,8 +83,16 @@ class FooterCacheValidator implements CacheValidatorInterface
         if ($this->isSocialLinks($payload)) {
 
             foreach ($payload as $index => $item) {
+
                 if (!isset($item['platform'], $item['url'], $item['icon_class'])) {
                     return "DC-04 Footer social links schema corruption at index {$index}";
+                }
+
+                // NO HTML anywhere here
+                foreach (['platform', 'url', 'icon_class'] as $field) {
+                    if ($this->containsHtml($item[$field])) {
+                        return "DC-05 Footer social links unsafe HTML in '{$field}' at index {$index}";
+                    }
                 }
 
                 if (
@@ -90,7 +114,7 @@ class FooterCacheValidator implements CacheValidatorInterface
     }
 
     /* =====================================================
-       TYPE DETECTORS (STRICT)
+       HELPERS
     ===================================================== */
 
     private function isFooterSettings(array $payload): bool
@@ -106,5 +130,10 @@ class FooterCacheValidator implements CacheValidatorInterface
     private function isSocialLinks(array $payload): bool
     {
         return isset($payload[0]['platform']);
+    }
+
+    private function containsHtml(string $value): bool
+    {
+        return $value !== strip_tags($value);
     }
 }

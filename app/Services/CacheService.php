@@ -4,6 +4,12 @@ namespace app\Services;
 use app\CacheValidators\CacheValidatorInterface;
 use app\CacheValidators\HeaderCacheValidator;
 use app\CacheValidators\FooterCacheValidator;
+use app\CacheValidators\HomeCacheValidator;
+use app\CacheValidators\HomeSectionCacheValidator;
+use app\CacheValidators\HomeAboutSectionCacheValidator;
+use app\CacheValidators\HomeSkillSectionCacheValidator;
+use app\CacheValidators\HomeProjectsSectionCacheValidator;
+use app\CacheValidators\HomeContactSectionCacheValidator;
 use Throwable;
 class CacheService {
 
@@ -55,23 +61,37 @@ class CacheService {
         return [
             new HeaderCacheValidator(),
             new FooterCacheValidator(),
+            new HomeCacheValidator(),
+            new HomeSectionCacheValidator(),
+            new HomeAboutSectionCacheValidator(),
+            new HomeSkillSectionCacheValidator(),
+            new HomeProjectsSectionCacheValidator(),
+            new HomeContactSectionCacheValidator(),
         ];
     }
 
     private static function validatePayload(string $cacheKey, array $payload): bool
     {
-    foreach (self::validators() as $validator) {
-        if ($validator->supports($cacheKey)) {
+        $matched = false;
 
-            $error = $validator->validate($payload);
+        foreach (self::validators() as $validator) {
+            if ($validator->supports($cacheKey)) {
+                $matched = true;
 
-            if ($error !== null) {
-                app_log("{$error}: {$cacheKey}.json", "warning");
-                return false;
+                $error = $validator->validate($payload);
+                if ($error !== null) {
+                    app_log("{$error}: {$cacheKey}.json", "warning");
+                    return false;
+                }
             }
         }
-    }
-    return true;
+
+        if (!$matched) {
+            app_log("DC-04 No validator registered for cache key: {$cacheKey}.json", "warning");
+            return false;
+        }
+
+        return true;
     }
 
 
@@ -109,8 +129,7 @@ class CacheService {
             return self::destroy(
                 $file,
                 "DC-03 Partial cache write (empty): {$safeKey}.json"
-            );e an 180+ IQ and run multi billion dollar company.
-            So think like company design head andd
+            );
         }
 
         if (strlen($json) < 50) {

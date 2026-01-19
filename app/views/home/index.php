@@ -53,9 +53,9 @@ require_once LAYOUT_HEAD_FILE;
     </p>
 
     <div class="flex flex-wrap justify-center gap-4 <?= $safeMode ? '' : 'reveal' ?>">
-        <a href="<?= url($home['cta_primary_link'] ?? '') ?>"
+        <a href="<?= url($home['cta_primary_link'] ?? 'downloadcv') ?>"
            class="bg-accent text-darkbg px-6 py-3 rounded-full font-semibold hover:bg-red-600 transition">
-            <?= field($home, 'cta_primary_text') ?>
+            <?= field($home, 'cta_primary_text') ?? 'Download CV'?>
         </a>
 
         <?php if (!$safeMode): ?>
@@ -84,11 +84,11 @@ require_once LAYOUT_HEAD_FILE;
 <?php if (!$safeMode && !empty($about)): ?>
     <section class="py-20 px-4 sm:px-10 lg:px-20 text-center bg-[#111827] reveal-left">
         <h2 class="text-3xl sm:text-4xl font-bold mb-8 text-accent">
-            <?= safe($about['title']) ?>
+            <?= safe($about['title'] ?? 'About Me') ?>
         </h2>
 
         <p class="max-w-3xl mx-auto text-gray-300 leading-relaxed text-base sm:text-lg lg:text-xl">
-            <?= $about['content'] ?>
+            <?= $about['content'] ?? '' ?>
         </p>
     </section>
 <?php endif; ?>
