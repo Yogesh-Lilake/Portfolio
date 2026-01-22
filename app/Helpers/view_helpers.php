@@ -64,3 +64,20 @@ function asset(string $path): string
     return PROJECT_URL . $path;
 }
 
+function safe_url($value, string $default = ''): string
+{
+    if (!isset($value) || $value === '') {
+        return $default;
+    }
+
+    $value = trim((string)$value);
+
+    // Allow only http/https
+    if (!preg_match('#^https?://#i', $value)) {
+        return $default;
+    }
+
+    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+}
+
+

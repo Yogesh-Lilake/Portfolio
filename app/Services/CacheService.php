@@ -10,6 +10,17 @@ use app\CacheValidators\HomeAboutSectionCacheValidator;
 use app\CacheValidators\HomeSkillSectionCacheValidator;
 use app\CacheValidators\HomeProjectsSectionCacheValidator;
 use app\CacheValidators\HomeContactSectionCacheValidator;
+
+// ABOUT PAGE
+use app\CacheValidators\AboutPageCacheValidator;
+use app\CacheValidators\AboutHeroSectionCacheValidator;
+use app\CacheValidators\AboutContentSectionCacheValidator;
+use app\CacheValidators\AboutSkillSectionCacheValidator;
+use app\CacheValidators\AboutExperienceSectionCacheValidator;
+use app\CacheValidators\AboutEducationSectionCacheValidator;
+use app\CacheValidators\AboutStatsSectionCacheValidator;
+
+
 use Throwable;
 class CacheService {
 
@@ -61,12 +72,26 @@ class CacheService {
         return [
             new HeaderCacheValidator(),
             new FooterCacheValidator(),
+
+            // PAGE-LEVEL VALIDATION
             new HomeCacheValidator(),
+            new AboutPageCacheValidator(),
+
+            // SECTION-LEVEL VALIDATION
+            // HOME
             new HomeSectionCacheValidator(),
             new HomeAboutSectionCacheValidator(),
             new HomeSkillSectionCacheValidator(),
             new HomeProjectsSectionCacheValidator(),
             new HomeContactSectionCacheValidator(),
+
+            // ABOUT
+            new AboutHeroSectionCacheValidator(),
+            new AboutContentSectionCacheValidator(),
+            new AboutSkillSectionCacheValidator(),
+            new AboutExperienceSectionCacheValidator(),
+            new AboutEducationSectionCacheValidator(),
+            new AboutStatsSectionCacheValidator(),
         ];
     }
 

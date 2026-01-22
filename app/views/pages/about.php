@@ -33,19 +33,19 @@ require_once LAYOUT_HEAD_FILE;
 <section class="relative py-20 sm:py-24 lg:py-28 overflow-hidden text-center <?= $safeMode ? '' : 'fade-up' ?>">
 
     <lottie-player
-        src="<?= htmlspecialchars($hero['animation_url'] ?? 'https://assets10.lottiefiles.com/packages/lf20_jcikwtux.json') ?>"
+        src="<?= safe_url($hero['animation_url'] ?? 'https://assets10.lottiefiles.com/packages/lf20_jcikwtux.json') ?>"
         background="transparent"
         speed="1"
         loop autoplay
-        style="position:absolute; inset:0; opacity:<?= $hero['background_opacity'] ?? 0.15 ?>; z-index:-1;">
+        style="position:absolute; inset:0; opacity:<?= (float)($hero['background_opacity'] ?? 0.15) ?>; z-index:-1;">
     </lottie-player>
 
     <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 text-accent <?= $safeMode ? '' : 'fade-up' ?>">
-        <?= htmlspecialchars($hero['title'] ?? "About") ?> <span class="text-white">Me</span>
+        <?= field($hero, 'title', 'About') ?> <span class="text-white">Me</span>
     </h1>
 
     <p class="text-gray-300 max-w-2xl mx-auto text-base sm:text-lg md:text-xl <?= $safeMode ? '' : 'fade-up' ?>">
-        <?= htmlspecialchars($hero['subtitle'] ?? "") ?>
+        <?= field($hero, 'subtitle') ?>
     </p>
 </section>
 
@@ -71,22 +71,22 @@ require_once LAYOUT_HEAD_FILE;
     <div class="flex-1 text-center md:text-left max-w-xl">
 
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 text-accent">
-            <?= htmlspecialchars($content["greeting_title"] ?? "Hello, I’m Yogesh") ?>
+            <?= field($content, 'greeting_title', "Hello, I’m Yogesh") ?>
         </h2>
 
         <p class="text-gray-300 mb-5 leading-relaxed text-sm sm:text-base md:text-lg">
-            <?= nl2br(htmlspecialchars($content['main_description'] ?? "")) ?>
+            <?= nl2br(field($content, 'main_description')) ?>
         </p>
 
         <p class="text-gray-300 mb-6 leading-relaxed text-sm sm:text-base md:text-lg">
-            <?= nl2br(htmlspecialchars($content['secondary_description'] ?? "")) ?>
+            <?= nl2br(field($content, 'secondary_description')) ?>
         </p>
 
-        <?php if (!empty($content["cta_link"])): ?>
-            <button onclick="ajaxDownload('<?= url($content['cta_link'] ?? '') ?>', 'Yogesh_Lilake_Resume.pdf')"
+        <?php if (!empty($content['cta_link'])): ?>
+            <button onclick="ajaxDownload('<?= url($content['cta_link']) ?>', 'Yogesh_Lilake_Resume.pdf')"
                 class="inline-block bg-accent hover:bg-red-600 text-darkbg px-8 py-3 rounded-full
-                      font-semibold transition text-sm sm:text-base">
-                <?= htmlspecialchars($content["cta_text"] ?? "Download CV") ?>
+                       font-semibold transition text-sm sm:text-base">
+                <?= field($content, 'cta_text', 'Download CV') ?>
             </button>
         <?php endif; ?>
 
@@ -109,9 +109,17 @@ require_once LAYOUT_HEAD_FILE;
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-6 sm:gap-8 
                 max-w-screen-xl mx-auto px-4">
         <?php foreach ($skills as $skill): ?>
-            <div class="p-6 bg-[#1E293B] rounded-xl hover:bg-accent hover:text-darkbg transition transform hover:scale-105">
-                <i class="<?= htmlspecialchars($skill['icon_class']) ?> <?= htmlspecialchars($skill['color_class']) ?> text-5xl mb-3"></i>
-                <h4 class="font-semibold"><?= htmlspecialchars($skill['skill_name']) ?></h4>
+            <div class="p-6 bg-[#1E293B] rounded-xl hover:bg-accent hover:text-darkbg
+                        transition transform hover:scale-105">
+
+                <i class="<?= field($skill, 'icon_class') ?>
+                           <?= field($skill, 'color_class') ?>
+                           text-5xl mb-3"></i>
+
+                <h4 class="font-semibold">
+                    <?= field($skill, 'skill_name') ?>
+                </h4>
+
             </div>
         <?php endforeach; ?>
     </div>
@@ -126,9 +134,13 @@ require_once LAYOUT_HEAD_FILE;
         <?php foreach ($experience as $exp): ?>
             <div class="bg-[#1E293B] rounded-xl p-8 min-h-[220px] flex flex-col justify-center hover:scale-105 transition text-center md:text-left">
                 <h4 class="text-xl font-semibold mb-3 text-accent">
-                    <?= htmlspecialchars($exp["title"]) ?>
+                    <?= field($exp, 'title') ?>
                 </h4>
-                <p class="text-gray-300"><?= htmlspecialchars($exp["description"]) ?></p>
+
+                <p class="text-gray-300">
+                    <?= field($exp, 'description') ?>
+                </p>
+
             </div>
         <?php endforeach; ?>
     </div>
@@ -152,28 +164,33 @@ require_once LAYOUT_HEAD_FILE;
                 <div class="bg-[#1E293B] rounded-xl p-6 md:p-8 hover:scale-[1.02] transition transform">
 
                     <h4 class="text-xl sm:text-2xl font-semibold text-accent mb-1">
-                        <?= htmlspecialchars($edu['degree']) ?>
+                        <?= field($edu, 'degree') ?>
                     </h4>
 
                     <p class="text-gray-300 font-medium mb-1">
-                        <?= htmlspecialchars($edu['institution']) ?>
+                        <?= field($edu, 'institution') ?>
                     </p>
 
                     <p class="text-gray-400 text-sm mb-2">
-                        <?= htmlspecialchars($edu['period']) ?>
+                        <?= field($edu, 'period') ?>
                     </p>
 
-                    <p class="text-gray-400 leading-relaxed text-sm sm:text-base">
-                        <?= htmlspecialchars($edu['description']) ?>
-                    </p>
+                    <?php if (!empty($edu['description'])): ?>
+                        <p class="text-gray-400 leading-relaxed text-sm sm:text-base">
+                            <?= field($edu, 'description') ?>
+                        </p>
+                    <?php endif; ?>
+
                 </div>
 
-                <!-- DOT -->
-                <span class="absolute left-[0.75rem] md:left-1/2 -translate-x-1/2 top-6 w-4 h-4 bg-accent rounded-full border-4 border-darkbg"></span>
+                <span class="absolute left-[0.75rem] md:left-1/2 -translate-x-1/2
+                             top-6 w-4 h-4 bg-accent rounded-full
+                             border-4 border-darkbg"></span>
 
                 <!-- Connector -->
                 <?php if ($index < count($education) - 1): ?>
-                    <span class="absolute left-[1rem] md:left-1/2 -translate-x-1/2 top-10 w-1 h-10 bg-accent/40"></span>
+                    <span class="absolute left-[1rem] md:left-1/2 -translate-x-1/2
+                                 top-10 w-1 h-10 bg-accent/40"></span>
                 <?php endif; ?>
             </div>
         <?php endforeach; ?>
@@ -188,13 +205,15 @@ require_once LAYOUT_HEAD_FILE;
         <?php foreach ($stats as $st): ?>
             <div>
                 <p class="text-4xl sm:text-5xl font-extrabold mb-2">
-                    <?= htmlspecialchars($st["value"]) ?>
+                    <?= field($st, 'value') ?>
                 </p>
+
                 <p class="text-gray-200 font-medium text-sm sm:text-base">
-                    <?= htmlspecialchars($st["label"]) ?>
+                    <?= field($st, 'label') ?>
                 </p>
             </div>
         <?php endforeach; ?>
+
     </div>
 </section>
 
