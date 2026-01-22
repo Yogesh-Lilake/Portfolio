@@ -1,10 +1,10 @@
 <?php
 namespace app\CacheValidators;
 
-class HomeCacheValidator implements CacheValidatorInterface
+class HomePageCacheValidator implements CacheValidatorInterface
 {
     /**
-     * Page-level cache only
+     * Page-level Home cache only
      */
     public function supports(string $key): bool
     {
@@ -12,17 +12,17 @@ class HomeCacheValidator implements CacheValidatorInterface
     }
 
     /**
-     * Validate full home page cache payload
+     * Validate full Home page cache payload
      *
-     * Rules:
-     * - Page cache must be fully self-consistent
-     * - No section may silently degrade
-     * - If any section violates contract → cache is invalid
+     * Invariants:
+     * - Home page cache represents a FULL DB snapshot
+     * - No fallback or degraded section may be cached
+     * - Schema is CLOSED (no unknown keys)
      */
     public function validate(array $payload): ?string
     {
         /* =====================================================
-           REQUIRED PAGE-LEVEL KEYS
+           CLOSED PAGE SCHEMA
         ===================================================== */
         $requiredSections = [
             'safe_mode',
@@ -33,6 +33,14 @@ class HomeCacheValidator implements CacheValidatorInterface
             'contact',
         ];
 
+        // Reject unknown keys
+        foreach ($payload as $key => $_) {
+            if (!in_array($key, $requiredSections, true)) {
+                return "DC-04 Home page schema violation (unexpected key '{$key}')";
+            }
+        }
+
+        // Ensure all required sections exist
         foreach ($requiredSections as $section) {
             if (!array_key_exists($section, $payload)) {
                 return "DC-04 Home page schema missing section '{$section}'";
@@ -47,7 +55,7 @@ class HomeCacheValidator implements CacheValidatorInterface
         }
 
         /* =====================================================
-           SECTION CONTRACT VALIDATION
+           SECTION CONTRACT + TRUST CONSISTENCY
         ===================================================== */
         foreach ($payload as $section => $block) {
 
@@ -72,10 +80,13 @@ class HomeCacheValidator implements CacheValidatorInterface
                 return "DC-03 Home page section '{$section}' payload corrupted";
             }
 
-            /* =================================================
-               SEMANTIC RULE: from_db implies non-empty data
-            ================================================= */
-            if ($block['from_db'] === true && empty($block['data'])) {
+            // Page cache must NEVER include fallback data
+            if ($block['from_db'] !== true) {
+                return "DC-05 Home page trust violation (page cache contains non-DB section '{$section}')";
+            }
+
+            // DB trust implies non-empty data
+            if (empty($block['data'])) {
                 return "DC-05 Home page section '{$section}' semantic corruption (from_db=true but data empty)";
             }
         }

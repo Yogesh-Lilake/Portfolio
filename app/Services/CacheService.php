@@ -4,7 +4,9 @@ namespace app\Services;
 use app\CacheValidators\CacheValidatorInterface;
 use app\CacheValidators\HeaderCacheValidator;
 use app\CacheValidators\FooterCacheValidator;
-use app\CacheValidators\HomeCacheValidator;
+
+// HOME PAGE
+use app\CacheValidators\HomePageCacheValidator;
 use app\CacheValidators\HomeSectionCacheValidator;
 use app\CacheValidators\HomeAboutSectionCacheValidator;
 use app\CacheValidators\HomeSkillSectionCacheValidator;
@@ -74,7 +76,7 @@ class CacheService {
             new FooterCacheValidator(),
 
             // PAGE-LEVEL VALIDATION
-            new HomeCacheValidator(),
+            new HomePageCacheValidator(),
             new AboutPageCacheValidator(),
 
             // SECTION-LEVEL VALIDATION
