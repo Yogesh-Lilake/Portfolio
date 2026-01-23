@@ -1,5 +1,7 @@
 <?php
-namespace app\CacheValidators;
+namespace app\CacheValidators\Pages\Home;
+
+use app\CacheValidators\Contracts\CacheValidatorInterface;
 
 class HomeSectionCacheValidator implements CacheValidatorInterface
 {

@@ -1,36 +1,37 @@
 <?php
 namespace app\Services;
 
-use app\CacheValidators\CacheValidatorInterface;
-use app\CacheValidators\HeaderCacheValidator;
-use app\CacheValidators\FooterCacheValidator;
+use app\CacheValidators\Contracts\CacheValidatorInterface;
 
-// HOME PAGE
-use app\CacheValidators\HomePageCacheValidator;
-use app\CacheValidators\HomeSectionCacheValidator;
-use app\CacheValidators\HomeAboutSectionCacheValidator;
-use app\CacheValidators\HomeSkillSectionCacheValidator;
-use app\CacheValidators\HomeProjectsSectionCacheValidator;
-use app\CacheValidators\HomeContactSectionCacheValidator;
+// GLOBAL
+use app\CacheValidators\Global\HeaderCacheValidator;
+use app\CacheValidators\Global\FooterCacheValidator;
 
-// ABOUT PAGE
-use app\CacheValidators\AboutPageCacheValidator;
-use app\CacheValidators\AboutHeroSectionCacheValidator;
-use app\CacheValidators\AboutContentSectionCacheValidator;
-use app\CacheValidators\AboutSkillSectionCacheValidator;
-use app\CacheValidators\AboutExperienceSectionCacheValidator;
-use app\CacheValidators\AboutEducationSectionCacheValidator;
-use app\CacheValidators\AboutStatsSectionCacheValidator;
+// HOME
+use app\CacheValidators\Pages\Home\HomePageCacheValidator;
+use app\CacheValidators\Pages\Home\HomeSectionCacheValidator;
+use app\CacheValidators\Pages\Home\HomeAboutSectionCacheValidator;
+use app\CacheValidators\Pages\Home\HomeSkillSectionCacheValidator;
+use app\CacheValidators\Pages\Home\HomeProjectsSectionCacheValidator;
+use app\CacheValidators\Pages\Home\HomeContactSectionCacheValidator;
 
+// ABOUT
+use app\CacheValidators\Pages\About\AboutPageCacheValidator;
+use app\CacheValidators\Pages\About\AboutHeroSectionCacheValidator;
+use app\CacheValidators\Pages\About\AboutContentSectionCacheValidator;
+use app\CacheValidators\Pages\About\AboutSkillSectionCacheValidator;
+use app\CacheValidators\Pages\About\AboutExperienceSectionCacheValidator;
+use app\CacheValidators\Pages\About\AboutEducationSectionCacheValidator;
+use app\CacheValidators\Pages\About\AboutStatsSectionCacheValidator;
 
+// CONTACT
+use app\CacheValidators\Pages\Contact\ContactPageCacheValidator;
+use app\CacheValidators\Pages\Contact\ContactHeroSectionCacheValidator;
+use app\CacheValidators\Pages\Contact\ContactInfoSectionCacheValidator;
+use app\CacheValidators\Pages\Contact\ContactMapSectionCacheValidator;
+use app\CacheValidators\Pages\Contact\ContactSocialsSectionCacheValidator;
+use app\CacheValidators\Pages\Contact\ContactToastSectionCacheValidator;
 
-// CONTACT PAGE
-use app\CacheValidators\ContactPageCacheValidator;
-use app\CacheValidators\ContactHeroSectionCacheValidator;
-use app\CacheValidators\ContactInfoSectionCacheValidator;
-use app\CacheValidators\ContactMapSectionCacheValidator;
-use app\CacheValidators\ContactSocialsSectionCacheValidator;
-use app\CacheValidators\ContactToastSectionCacheValidator;
 
 use Throwable;
 class CacheService {

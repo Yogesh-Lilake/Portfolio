@@ -1,5 +1,5 @@
 <?php
-namespace app\CacheValidators;
+namespace app\CacheValidators\Contracts;
 
 interface CacheValidatorInterface
 {

@@ -1,5 +1,7 @@
 <?php
-namespace app\CacheValidators;
+namespace app\CacheValidators\Global;
+
+use app\CacheValidators\Contracts\CacheValidatorInterface;
 
 class HeaderCacheValidator implements CacheValidatorInterface
 {
