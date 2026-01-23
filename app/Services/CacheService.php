@@ -23,6 +23,15 @@ use app\CacheValidators\AboutEducationSectionCacheValidator;
 use app\CacheValidators\AboutStatsSectionCacheValidator;
 
 
+
+// CONTACT PAGE
+use app\CacheValidators\ContactPageCacheValidator;
+use app\CacheValidators\ContactHeroSectionCacheValidator;
+use app\CacheValidators\ContactInfoSectionCacheValidator;
+use app\CacheValidators\ContactMapSectionCacheValidator;
+use app\CacheValidators\ContactSocialsSectionCacheValidator;
+use app\CacheValidators\ContactToastSectionCacheValidator;
+
 use Throwable;
 class CacheService {
 
@@ -78,6 +87,7 @@ class CacheService {
             // PAGE-LEVEL VALIDATION
             new HomePageCacheValidator(),
             new AboutPageCacheValidator(),
+            new ContactPageCacheValidator(),
 
             // SECTION-LEVEL VALIDATION
             // HOME
@@ -94,6 +104,13 @@ class CacheService {
             new AboutExperienceSectionCacheValidator(),
             new AboutEducationSectionCacheValidator(),
             new AboutStatsSectionCacheValidator(),
+
+            // CONTACT
+            new ContactHeroSectionCacheValidator(),
+            new ContactInfoSectionCacheValidator(),
+            new ContactMapSectionCacheValidator(),
+            new ContactSocialsSectionCacheValidator(),
+            new ContactToastSectionCacheValidator(),
         ];
     }
 

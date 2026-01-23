@@ -36,21 +36,21 @@ require_once LAYOUT_HEAD_FILE;
 <!-- HERO -->
 <section class="text-center py-16 md:py-24 px-4 sm:px-8" data-aos= <?= $safeMode ? '' : 'fade-up' ?> data-aos-duration= <?= $safeMode ? '' : '1000' ?>>
   <h1 class="text-3xl sm:text-5xl lg:text-6xl font-bold mb-6 text-white leading-snug">
-    <?= htmlspecialchars($heroSection['heading'] ?? "Let’s Build Something Great Together 🚀") ?>
+    <?= field($heroSection, 'hero_heading', 'Let’s Build Something Great Together 🚀') ?>
   </h1>
 
   <p class="text-base sm:text-lg lg:text-xl text-gray-400 max-w-2xl mx-auto">
-    <?= htmlspecialchars($heroSection['subheading'] ?? "Whether it's collaboration or learning — I'm open!") ?>
+    <?= field($heroSection, 'hero_subheading', "Whether it's collaboration or learning — I'm open!") ?>
   </p>
 
   <?php if (!empty($heroSection['hero_lottie_url'])): ?>
     <div class="mt-10 flex justify-center" data-aos= <?= $safeMode ? '' : 'zoom-in' ?> data-aos-delay= <?= $safeMode ? '' : '200' ?>>
       <?php $asset = $heroSection['hero_lottie_url']; ?>
       <?php if (str_starts_with($asset, 'http') || str_starts_with($asset, 'https')): ?>
-        <lottie-player src="<?= htmlspecialchars($asset) ?>" background="transparent" speed="1" style="width: clamp(160px, 35vw, 260px); height: auto;" loop autoplay></lottie-player>
+        <lottie-player src="<?= safe_url($asset) ?>" background="transparent" speed="1" style="width: clamp(160px, 35vw, 260px); height: auto;" loop autoplay></lottie-player>
       <?php else: ?>
         <!-- Local asset fallback (file path provided) -->
-        <img src="<?= htmlspecialchars($asset) ?>" alt="hero asset" style="width: clamp(160px, 35vw, 260px); height: auto;" />
+        <img src="<?= safe_url($asset) ?>" alt="hero asset" style="width: clamp(160px, 35vw, 260px); height: auto;" />
       <?php endif; ?>
     </div>
   <?php endif; ?>
@@ -108,15 +108,15 @@ require_once LAYOUT_HEAD_FILE;
     <div class="text-gray-300 space-y-6" data-aos= <?= $safeMode ? '' : 'fade-left' ?> data-aos-delay= <?= $safeMode ? '' : '150' ?>>
       <h3 class="text-2xl sm:text-3xl font-semibold text-white">Let’s Talk!</h3>
 
-      <p class="text-gray-400"><?= htmlspecialchars($heroSection['subheading'] ?? '') ?></p>
+      <?= field($heroSection, 'hero_subheading', "Whether it's collaboration or learning — I'm open!") ?>
 
       <div class="space-y-3">
         <?php if (!empty($infoSection) && is_array($infoSection)): ?>
           <?php foreach ($infoSection as $item): ?>
             <p>
-              <i class="<?= htmlspecialchars($item['icon_class'] ?? '') ?> text-accent mr-2"></i>
-              <?= htmlspecialchars($item['label'] ?? '') ?>:
-              <span><?= htmlspecialchars($item['value'] ?? '') ?></span>
+              <i class="<?= field($item, 'icon_class') ?> text-accent mr-2"></i>
+              <?= field($item, 'label') ?>:
+              <span><?= field($item, 'value') ?></span>
             </p>
           <?php endforeach; ?>
         <?php else: ?>
@@ -127,8 +127,8 @@ require_once LAYOUT_HEAD_FILE;
       <div class="flex gap-5 pt-4">
         <?php if (!empty($socialsSection) && is_array($socialsSection)): ?>
           <?php foreach ($socialsSection as $s): ?>
-            <a href="<?= htmlspecialchars($s['url'] ?? '#') ?>" target="_blank" class="hover:text-accent text-2xl">
-              <i class="<?= htmlspecialchars($s['icon_class'] ?? '') ?>"></i>
+            <a href="<?= safe_url($s['url'] ?? '#') ?>" target="_blank" class="hover:text-accent text-2xl">
+              <i class="<?= field($s, 'icon_class') ?>"></i>
             </a>
           <?php endforeach; ?>
         <?php endif; ?>
@@ -139,7 +139,7 @@ require_once LAYOUT_HEAD_FILE;
 
   <?php if (!$safeMode && !empty($mapSection['map_embed_url'])): ?>
     <div class="mt-16 rounded-2xl overflow-hidden shadow-lg aspect-[16/9]" data-aos="fade-up" data-aos-delay="200">
-      <iframe src="<?= htmlspecialchars($mapSection['map_embed_url']) ?>" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+      <iframe src="<?= safe_url($mapSection['map_embed_url']) ?>" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
     </div>
   <?php endif; ?>
 
