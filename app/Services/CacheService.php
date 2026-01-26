@@ -24,6 +24,12 @@ use app\CacheValidators\Pages\About\AboutExperienceSectionCacheValidator;
 use app\CacheValidators\Pages\About\AboutEducationSectionCacheValidator;
 use app\CacheValidators\Pages\About\AboutStatsSectionCacheValidator;
 
+// PROJECT
+use app\CacheValidators\Pages\Project\ProjectPageCacheValidator;
+
+// PROJECT LIST
+use app\CacheValidators\Lists\Projects\ProjectListCacheValidator;
+
 // CONTACT
 use app\CacheValidators\Pages\Contact\ContactPageCacheValidator;
 use app\CacheValidators\Pages\Contact\ContactHeroSectionCacheValidator;
@@ -89,6 +95,7 @@ class CacheService {
             new HomePageCacheValidator(),
             new AboutPageCacheValidator(),
             new ContactPageCacheValidator(),
+            new ProjectPageCacheValidator(),
 
             // SECTION-LEVEL VALIDATION
             // HOME
@@ -112,6 +119,9 @@ class CacheService {
             new ContactMapSectionCacheValidator(),
             new ContactSocialsSectionCacheValidator(),
             new ContactToastSectionCacheValidator(),
+
+            // PROJECT LIST
+            new ProjectListCacheValidator(),
         ];
     }
 
