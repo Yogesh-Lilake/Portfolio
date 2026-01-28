@@ -30,6 +30,15 @@ use app\CacheValidators\Pages\Project\ProjectPageCacheValidator;
 // PROJECT LIST
 use app\CacheValidators\Lists\Projects\ProjectListCacheValidator;
 
+// NOTES
+use app\CacheValidators\Pages\Notes\NotesPageCacheValidator;
+
+// NOTES LIST
+use app\CacheValidators\Lists\Notes\NotesListCacheValidator;
+use app\CacheValidators\Lists\Notes\NotePinnedCacheValidator;
+use app\CacheValidators\Lists\Notes\NoteTagsCacheValidator;
+use app\CacheValidators\Lists\Notes\NoteCategoriesCacheValidator;
+
 // CONTACT
 use app\CacheValidators\Pages\Contact\ContactPageCacheValidator;
 use app\CacheValidators\Pages\Contact\ContactHeroSectionCacheValidator;
@@ -96,6 +105,7 @@ class CacheService {
             new AboutPageCacheValidator(),
             new ContactPageCacheValidator(),
             new ProjectPageCacheValidator(),
+            new NotesPageCacheValidator(),
 
             // SECTION-LEVEL VALIDATION
             // HOME
@@ -122,6 +132,12 @@ class CacheService {
 
             // PROJECT LIST
             new ProjectListCacheValidator(),
+
+            // NOTES LIST
+            new NotesListCacheValidator(),
+            new NotePinnedCacheValidator(),
+            new NoteTagsCacheValidator(),
+            new NoteCategoriesCacheValidator(),
         ];
     }
 
