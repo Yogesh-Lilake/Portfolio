@@ -145,10 +145,11 @@ Business Validators (app/CacheValidators/)
 
 Validator Layer
   app/CacheValidators/
-  ├── CacheValidatorInterface.php
-  ├── HeaderCacheValidator.php
-  ├── FooterCacheValidator.php
-  ├── *.php
+  ├── Contracts/
+  |     ├── CacheValidatorInterface.php
+  ├── Global/
+  ├── Lists/
+  ├── Pages/
 
 
 This separation ensures:
@@ -388,10 +389,34 @@ Portfolio/
 |
 |── app/ # This folder contains all backend application logic & It is the “brain” of your portfolio
 |    ├── CacheValidators/                   # All page cache validators class and functions
-|    │    ├── CacheValidatorInterface.php
-|    │    ├── HeaderCacheValidator.php
-|    │    ├── FooterCacheValidator.php
-|    |    └── *.php                         
+|    │    ├── Contracts/                    # Validator Interface
+|    │    │    └── CacheValidatorInterface.php 
+|    │    │  
+|    │    ├── Global/
+|    │    │     ├── HeaderCacheValidator.php
+|    │    │     └── FooterCacheValidator.php
+|    │    │
+|    │    ├── Lists/
+|    │    │     ├── Notes/
+|    │    │     │     ├── NoteCategoriesCacheValidator.php
+|    │    │     │     ├── NotePinnedCacheValidator.php
+|    │    │     │     ├── NotesListCacheValidator.php
+|    │    │     │     └── NoteTagsCacheValidator.php
+|    │    │     │     
+|    │    │     ├── Projects/
+|    │    │           └── ProjectListCacheValidator.php
+|    │    │
+|    │    ├── Pages/      # Page-level & section-level each pages Validators
+|    │    │     ├── About/
+|    │    │     │     └── *.php
+|    │    │     ├── Contact/
+|    │    │     │     └── *.php
+|    │    │     ├── Home/
+|    │    │     │     └── *.php
+|    │    │     ├── Notes/
+|    │    │     │     └── *.php
+|    │    │     ├── Project/    
+|    │    │           └── *.php                    
 |    |
 |    ├── Controllers/            # 🎯 Page Controllers
 │    │   ├── HomeController.php       # Loads Homepage sections using unified flow`
