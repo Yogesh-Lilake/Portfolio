@@ -1,7 +1,7 @@
 [
   {
     "platform": "GitHub",
-    "url": "fromdefaulthttps://github.com",
+    "url": "https://github.com",
     "icon_class": "fa-github"
   },
   {
@@ -16,7 +16,7 @@
   },
   {
     "platform": "Email",
-    "url": "mailto:hello@example.com",
+    "url": "https://mail.google.com/mail/?view=cm&fs=1&to=yogeshlilakedev02@gmail.com&su=Portfolio%20Contact&body=Hi%20Yogesh,%0A%0AI%20visited%20your%20portfolio%20and%20would%20like%20to%20connect.%0A%0ARegards,",
     "icon_class": "fa-envelope"
   }
 ]

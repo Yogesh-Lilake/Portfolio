@@ -158,6 +158,86 @@ This separation ensures:
   2. **Business rules evolve independently**
   3. **Cross-section corruption is prevented**
 
+---
+
+### 🧩 JSON Validation Architecture (Enterprise-Critical)  
+
+❓ Why JSON Validation is REQUIRED
+
+**Default JSON files are:**
+  1. **Human-editable**
+  2. **Not type-safe**
+  3. **Silent on failure**
+  4. **Directly consumed by views**
+
+Therefore:
+  **JSON must never be trusted blindly.**
+
+**🔍 JSON Validation Layers (4-Stage Trust Model)**
+
+Every default JSON file passes through four validation stages before being used.
+
+Stage	Validation Type	Purpose:
+
+| Stage | Source              | Description                 |
+| ----- | ------------------- | --------------------------- |
+| 1     | File Existence      | Prevent filesystem errors   |
+| 2     | JSON Syntax         | Prevent malformed JSON      |
+| 3     | Schema Validation   | Prevent missing keys (DC-09)|
+| 4     | Semantic Validation | Prevent broken UX values    |
+
+If any stage fails → JSON is rejected → system falls back to hard-coded defaults.
+
+
+Every JSON file passes through:
+
+  1. File existence check
+  2. JSON syntax validation (DC-01)
+  3. Root structure validation (DC-02)
+  4. Schema validation (DC-09)
+  5. Type & empty validation (DC-10)
+  6. Semantic & security validation (DC-11)
+  7. Closed schema enforcement (DC-12)
+
+⚠️ Invalid JSON never activates Safe Mode
+⚠️ Invalid JSON is treated as recoverable content failure
+
+**🧨 JSON Corruption Class: DC-09 (NEW)**
+DC-09 — JSON Exists but Schema Invalid
+
+Scenario
+  - JSON file exists
+  - JSON parses successfully
+  - Required keys are missing or invalid
+
+Expected Flow
+  - Cache ❌
+  - DB ❌
+  - JSON ❌ (schema invalid)
+    ↓
+  - Hard-coded fallback
+    ↓
+  - Page renders normally
+
+
+Guaranteed Result
+  - Page renders
+  - Warning logged
+  - safe_mode = false
+  - Cache NOT polluted
+
+**🧱 JSON Validator Architecture**
+
+JSON validation is implemented using dedicated validator classes, fully separated from Models and Services.
+
+This ensures:
+  - Zero confusion
+  - Instant mapping
+  - Easy debugging
+  - Easy scaling
+
+---
+
 ### 🔐 Safe Mode Architecture (Enterprise Fail-Safe UX Layer)
 
 This project implements a Safe Mode UI + Controller Architecture, inspired by real-world production systems (Google, Stripe, AWS dashboards).
@@ -407,6 +487,30 @@ Portfolio/
 |    │    │           └── ProjectListCacheValidator.php
 |    │    │
 |    │    ├── Pages/      # Page-level & section-level each pages Validators
+|    │    │     ├── About/
+|    │    │     │     └── *.php
+|    │    │     ├── Contact/
+|    │    │     │     └── *.php
+|    │    │     ├── Home/
+|    │    │     │     └── *.php
+|    │    │     ├── Notes/
+|    │    │     │     └── *.php
+|    │    │     ├── Project/    
+|    │    │           └── *.php                    
+|    |
+|    ├── JsonValidators/                   # All page JSON validators class and functions
+|    │    ├── Contracts/                    # Validator Interface
+|    │    │    └── JsonValidatorInterface.php 
+|    │    │  
+|    │    ├── Global/
+|    │    │     ├── HeaderSettingJsonValidator.php
+|    │    │     └── FooterSettingJsonValidator.php
+|    │    │
+|    │    ├── Shared/   # Same data of different pages validators 
+|    │    │     ├── NavigationLinksJsonValidator.php
+|    │    │     └── SocialLinksJsonValidator.php
+|    │    │
+|    │    ├── Pages/      # Page-level & section-level each pages JSON Validators
 |    │    │     ├── About/
 |    │    │     │     └── *.php
 |    │    │     ├── Contact/

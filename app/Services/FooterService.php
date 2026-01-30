@@ -3,6 +3,11 @@ namespace app\Services;
 
 use app\Services\CacheService;
 use app\Core\DB;
+
+use app\JsonValidators\Global\FooterSettingJsonValidator;
+use app\JsonValidators\Shared\NavigationLinksJsonValidator;
+use app\JsonValidators\Shared\SocialLinksJsonValidator;
+
 use Throwable;
 
 class FooterData
@@ -85,12 +90,34 @@ class FooterData
         }
 
         if ($row["source"] === "empty" && $this->defaultFooterPath && file_exists($this->defaultFooterPath)) {
-            $json = json_decode(file_get_contents($this->defaultFooterPath), true);
-            if (!empty($json)) {
-                return ["source" => "json", "data" => $this->normalizeFooter($json)];
+            
+            $raw = file_get_contents($this->defaultFooterPath);
+            $json = json_decode($raw, true);
+
+            // DC-01: silent
+            if (!is_array($json)) {
+                goto HARD_FALLBACK;
             }
+
+            // DC-02: silent
+            if (array_is_list($json)) {
+                goto HARD_FALLBACK;
+            }
+
+            $validator = new FooterSettingJsonValidator();
+
+            if ($validator->validate($json)) {
+                return [
+                    "source" => "json",
+                    "data"   => $this->normalizeFooter($json)
+                ];
+            }
+
+            // DC-09+
+            app_log($validator->getErrorCode(), 'warning');
         }
 
+        HARD_FALLBACK:
         return ["source" => "fallback", "data" => $this->normalizeFooter($this->defaultFooter())];
     }
 
@@ -139,12 +166,34 @@ class FooterData
         }
 
         if ($row["source"] === "empty" && $this->defaultLinksPath && file_exists($this->defaultLinksPath)) {
-            $json = json_decode(file_get_contents($this->defaultLinksPath), true);
-            if (!empty($json)) {
-                return ["source" => "json", "data" => $json];
+
+            $raw = file_get_contents($this->defaultLinksPath);
+            $json = json_decode($raw, true);
+
+            // DC-01
+            if (!is_array($json)) {
+                goto HARD_FALLBACK;
             }
+
+            // DC-02
+            if (!array_is_list($json)) {
+                goto HARD_FALLBACK;
+            }
+
+            $validator = new NavigationLinksJsonValidator();
+
+            if ($validator->validate($json)) {
+                return [
+                    "source" => "json",
+                    "data"   => $json
+                ];
+            }
+
+            // DC-09+
+            app_log($validator->getErrorCode(), 'warning');
         }
 
+        HARD_FALLBACK:
         return ["source" => "fallback", "data" => $this->defaultLinks()];
     }
 
@@ -195,18 +244,30 @@ class FooterData
         }
 
         if ($row["source"] === "empty" && $this->defaultSocialPath && file_exists($this->defaultSocialPath)) {
-            $json = json_decode(file_get_contents($this->defaultSocialPath), true);
+            
+            $raw  = file_get_contents($this->defaultSocialPath);
+            $json = json_decode($raw, true);
 
-            if (!empty($json)) {
+            // DC-01 — silent
+            if (!is_array($json)) {
+                goto HARD_FALLBACK;
+            }
 
+            $validator = new SocialLinksJsonValidator();
+
+            if ($validator->validate($json)) {
                 return [
-                    "source" => "json", 
-                    "data" => $json
+                    "source" => "json",
+                    "data"   => $json
                 ];
             }
+
+            // DC-09+
+            app_log($validator->getErrorCode(), 'warning');
         }
 
         /** D. Hard fallback */
+        HARD_FALLBACK:
         return [
             "source" => "fallback", 
             "data" => $this->defaultSocial()
@@ -240,10 +301,10 @@ class FooterData
     private function defaultSocial(): array
     {
         return [
-            ["platform" => "GitHub",   "url" => "DDhttps://github.com",   "icon_class" => "fa-github"],
+            ["platform" => "GitHub",   "url" => "https://github.com",   "icon_class" => "fa-github"],
             ["platform" => "LinkedIn", "url" => "https://linkedin.com", "icon_class" => "fa-linkedin"],
             ["platform" => "Twitter",  "url" => "https://twitter.com",  "icon_class" => "fa-twitter"],
-            ["platform" => "Email",    "url" => "mailto:hello@example.com", "icon_class" => "fa-envelope"],
+            ["platform" => "Email",    "url" => "https://mail.google.com/mail/?view=cm&fs=1&to=yogeshlilakedev02@gmail.com&su=Portfolio%20Contact&body=Hi%20Yogesh,%0A%0AI%20visited%20your%20portfolio%20and%20would%20like%20to%20connect.%0A%0ARegards,", "icon_class" => "fa-envelope"],
         ];
     }
 

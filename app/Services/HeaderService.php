@@ -3,6 +3,10 @@ namespace app\Services;
 
 use app\Services\CacheService;
 use app\Core\DB;
+
+use app\JsonValidators\Global\HeaderSettingJsonValidator;
+use app\JsonValidators\Shared\NavigationLinksJsonValidator;
+
 use Throwable;
 
 class HeaderData {
@@ -62,16 +66,47 @@ class HeaderData {
 
         /** C. JSON */
         if ($this->defaultHeaderPath && file_exists($this->defaultHeaderPath)) {
-            $json = json_decode(file_get_contents($this->defaultHeaderPath), true);
-            if (!empty($json)) {
+
+            $raw  = file_get_contents($this->defaultHeaderPath);
+            $json = json_decode($raw, true);
+
+            /**
+             * DC-01: Invalid JSON syntax
+             * - json_decode() failed
+             * - Silent ignore
+            */
+            if (!is_array($json)) {
+                // DO NOT log
+                goto HARD_FALLBACK;
+            }
+
+            /**
+             * DC-02: Root structure invalid (list instead of object)
+             * - Silent ignore
+            */
+            if (array_is_list($json)) {
+                // DO NOT log
+                goto HARD_FALLBACK;
+            }
+
+            /**
+             * Schema + semantic validation (DC-09+)
+            */
+            $validator = new HeaderSettingJsonValidator();
+
+            if ($validator->validate($json)) {
                 return [
-                    "source" => "json",
-                    "data"   => $this->normalize($json)
+                    'source' => 'json',
+                    'data'   => $this->normalize($json)
                 ];
             }
+
+            // DC-09 / DC-10 / DC-11 → log
+            app_log($validator->getErrorCode(), 'warning');
         }
 
         /** D. Hard fallback */
+        HARD_FALLBACK:
         return [
             "source" => "fallback",
             "data"   => $this->normalize($this->defaultHeader())
@@ -142,16 +177,35 @@ class HeaderData {
 
         /** C. JSON */
         if ($this->defaultNavPath && file_exists($this->defaultNavPath)) {
-            $json = json_decode(file_get_contents($this->defaultNavPath), true);
-            if (!empty($json)) {
+            
+            $raw = file_get_contents($this->defaultNavPath);
+            $json = json_decode($raw, true);
+
+            // DC-01: invalid JSON => silent
+            if (!is_array($json)) {
+                goto HARD_FALLBACK;
+            }
+
+            // DC-02: root not list => silent
+            if (!array_is_list($json)) {
+                goto HARD_FALLBACK;
+            }
+
+            $validator = new NavigationLinksJsonValidator();
+
+            if ($validator->validate($json)) {
                 return [
                     "source" => "json",
                     "data"   => $json
                 ];
             }
+
+            // DC-09+ only
+            app_log($validator->getErrorCode(), 'warning');
         }
 
         /** D. Hard fallback */
+        HARD_FALLBACK:
         return [
             "source" => "fallback",
             "data"   => $this->defaultNav()
