@@ -2,6 +2,10 @@
 /**
  * FOOTER COMPONENT
  * Safe-mode aware, zero-crash
+ *
+ * RULE:
+ * - Never use htmlspecialchars() in views
+ * - Always use view helpers (safe, field, safe_url, url)
  */
 
 $safeMode = $data['safe_mode'] ?? false;
@@ -16,15 +20,7 @@ if (!$safeMode) {
     try {
         require_once FOOTERSERVICE_FILE;
 
-        /*
-        use app\core\DB;
-        use app\Services\FooterData;
-
-        $db = DB::getInstance()->pdo();
-
-        $data = (new FooterData($db))->get();
-        */
-        // ✅ Use fully qualified class names (NO use statements in views)
+        // Use fully qualified names in views (NO use statements)
         $db = \app\Core\DB::getInstance()->pdo();
         $footerData = (new \app\Services\FooterData($db))->get();
 
@@ -32,9 +28,9 @@ if (!$safeMode) {
         $linksPayload  = $footerData['links']  ?? [];
         $socialPayload = $footerData['social'] ?? [];
 
-        $footer       = $footerPayload['data'] ?? [];
-        $footer_links = $linksPayload['data']  ?? [];
-        $social_links = $socialPayload['data'] ?? [];
+        $footer        = $footerPayload['data'] ?? [];
+        $footer_links  = $linksPayload['data']  ?? [];
+        $social_links  = $socialPayload['data'] ?? [];
 
     } catch (Throwable $e) {
         app_log("Footer fallback triggered: " . $e->getMessage(), "error");
@@ -49,14 +45,14 @@ $footer_js  = [FOOTER_JS];
 if ($safeMode):
 ?>
 <footer class="mt-24 py-12 text-center text-gray-400 border-t border-[#ffffff08]">
-    <p>© <?= $year ?> Yogesh Lilake. All Rights Reserved.</p>
+    <p>© <?= $year ?> <?= safe(SITE_TITLE) ?>. All Rights Reserved.</p>
     <p class="mt-2 text-sm">Some features are temporarily unavailable.</p>
 </footer>
 <?php return; endif; ?>
 
 <!-- FOOTER CSS -->
 <?php foreach ($footer_css as $css): ?>
-    <link rel="stylesheet" href="<?= htmlspecialchars($css) ?>">
+    <link rel="stylesheet" href="<?= safe($css) ?>">
 <?php endforeach; ?>
 
 <footer class="text-color font-medium mt-24 border-t border-[#ffffff08] relative">
@@ -72,10 +68,10 @@ if ($safeMode):
         <!-- BRAND -->
         <div class="space-y-3 animate-[fade-up_0.6s_ease-out]">
             <h2 class="text-white text-2xl sm:text-3xl font-bold tracking-wide brand-hover">
-                <?= htmlspecialchars($footer['brand_name'] ?? SITE_TITLE) ?>
+                <?= field($footer, 'brand_name', SITE_TITLE) ?>
             </h2>
             <p class="text-gray-400 text-sm sm:text-base leading-relaxed">
-                <?= htmlspecialchars($footer['footer_description'] ?? '') ?>
+                <?= field($footer, 'footer_description') ?>
             </p>
         </div>
 
@@ -88,9 +84,9 @@ if ($safeMode):
             <div class="grid grid-cols-2 sm:grid-cols-1 gap-x-6 sm:gap-x-0 gap-y-1">
                 <?php if (is_array($footer_links)): ?>
                     <?php foreach ($footer_links as $link): ?>
-                        <a href="<?= url($link['url'] ?? '') ?>"
+                        <a href="<?= safe(url($link['url'] ?? '')) ?>"
                            class="hover:text-accent transition-colors duration-300">
-                            <?= htmlspecialchars($link['label'] ?? '') ?>
+                            <?= safe($link['label'] ?? '') ?>
                         </a>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -106,12 +102,12 @@ if ($safeMode):
             <div class="flex flex-wrap gap-5 mt-3">
                 <?php if (is_array($social_links)): ?>
                     <?php foreach ($social_links as $s): ?>
-                        <a href="<?= htmlspecialchars($s['url'] ?? '#') ?>"
+                        <a href="<?= safe_url($s['url'] ?? '#') ?>"
                            target="_blank"
                            class="text-gray-400 hover:text-accent text-2xl sm:text-xl 
                                   social-icon transition-all duration-300 transform hover:scale-110"
-                           aria-label="<?= htmlspecialchars($s['platform'] ?? 'social') ?>">
-                            <i class="fab <?= htmlspecialchars($s['icon_class'] ?? '') ?>"></i>
+                           aria-label="<?= safe($s['platform'] ?? 'social') ?>">
+                            <i class="fab <?= safe($s['icon_class'] ?? '') ?>"></i>
                         </a>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -127,13 +123,13 @@ if ($safeMode):
                 sm:text-base text-gray-400 text-center gap-2">
 
         <p class="animate-[fade-up_1.2s_ease-out]">
-            © <?= $year ?> <?= htmlspecialchars($footer['brand_name'] ?? SITE_TITLE) ?>. All Rights Reserved.
+            © <?= $year ?> <?= field($footer, 'brand_name', SITE_TITLE) ?>. All Rights Reserved.
         </p>
 
         <p class="animate-[fade-up_1.4s_ease-out]">
             Designed & Developed by 
             <span class="name-glow text-accent">
-                <?= htmlspecialchars($footer['developer_name'] ?? 'Developer') ?>
+                <?= field($footer, 'developer_name', 'Developer') ?>
             </span>.
         </p>
     </div>
@@ -142,5 +138,5 @@ if ($safeMode):
 
 <!-- FOOTER JS -->
 <?php foreach ($footer_js as $js): ?>
-    <script src="<?= htmlspecialchars($js) ?>"></script>
+    <script src="<?= safe($js) ?>"></script>
 <?php endforeach; ?>

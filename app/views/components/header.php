@@ -1,94 +1,122 @@
 <?php
+/**
+ * GLOBAL HEADER COMPONENT
+ *
+ * Rules:
+ * - NEVER use htmlspecialchars() directly in views
+ * - ALWAYS use view helpers (safe, field, url, asset, logo)
+ * - Assume data is validated + normalized by Service + JSON Validators
+ */
+
 require_once HEADERSERVICE_FILE;
 
-use app\core\DB;
+use app\Core\DB;
 use app\Services\HeaderData;
 
-$db = DB::getInstance()->pdo();
+// Load header + navigation data (Cache → DB → JSON → Fallback)
+$data = (new HeaderData())->get();
 
-// Pass DB to HeaderData
-$data = (new HeaderData($db))->get();
 $headerPayload = $data['header'] ?? [];
 $navPayload    = $data['nav'] ?? [];
 
-$header     = $headerPayload['data'] ?? [];
-$nav_links  = $navPayload['data'] ?? [];
+$header    = $headerPayload['data'] ?? [];
+$nav_links = $navPayload['data'] ?? [];
 
-// Header asset paths
+// Header assets
 $header_css = [HEADER_CSS];
 $header_js  = [HEADER_JS];
 
-// Detect project base URL (ex: /Portfolio/public)
+/**
+ * Detect base path (supports /Portfolio/public, subfolders, prod)
+ */
 $BASE_URL = dirname($_SERVER['SCRIPT_NAME']);
-if ($BASE_URL === "/") $BASE_URL = "";
+if ($BASE_URL === '/') {
+    $BASE_URL = '';
+}
 
-// Detect FULL request URI (ex: /Portfolio/public/about)
+/**
+ * Detect current route (used for active link highlighting)
+ */
 $currentUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-// Remove base path from URI → gives clean route (/about)
-if ($BASE_URL !== "" && strpos($currentUri, $BASE_URL) === 0) {
+if ($BASE_URL !== '' && str_starts_with($currentUri, $BASE_URL)) {
     $currentUri = substr($currentUri, strlen($BASE_URL));
 }
 
-// Normalize
-$currentRoute = "/" . trim($currentUri, "/");
-if ($currentRoute === "//" || $currentRoute === "/") {
-    $currentRoute = "/";
+$currentRoute = '/' . trim($currentUri, '/');
+if ($currentRoute === '//') {
+    $currentRoute = '/';
 }
 ?>
 
 <!-- HEADER CSS -->
 <?php foreach ($header_css as $css): ?>
-  <link rel="stylesheet" href="<?= htmlspecialchars($css) ?>">
+  <!-- asset() is NOT required for CSS constants; safe() escapes output -->
+  <link rel="stylesheet" href="<?= safe($css) ?>">
 <?php endforeach; ?>
 
-<script src="<?= TAILWIND_CONFIG_JS ?>"></script>
+<script src="<?= safe(TAILWIND_CONFIG_JS) ?>"></script>
 
 <header id="siteHeader" class="text-color font-medium select-none">
 
-  <!-- TOP HEADER BAR -->
+  <!-- TOP BAR -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
 
     <!-- LOGO -->
     <a href="<?= HOME_URL ?>" class="flex items-center space-x-2 group">
-      <img src="<?= logo($header['logo_path']) ?>"
-            class="h-9 w-9 rounded-full transition-transform group-hover:rotate-12 duration-300 shadow-md shadow-[<?= htmlspecialchars($header['accent_color']) ?>55]">
+      <img
+        src="<?= logo($header['logo_path'] ?? null) ?>"
+        alt="<?= field($header, 'site_title', 'Site Logo') ?>"
+        class="h-9 w-9 rounded-full transition-transform group-hover:rotate-12 duration-300 shadow-md
+               shadow-[<?= safe($header['accent_color'] ?? '#000') ?>55]"
+      >
       <span class="logo-text gradient-text tracking-wide duration-300">
-        <?= htmlspecialchars($header['site_title']) ?>
+        <?= field($header, 'site_title', SITE_TITLE) ?>
       </span>
     </a>
 
-    <!-- DESKTOP NAV -->
+    <!-- DESKTOP NAVIGATION -->
     <nav class="hidden md:flex space-x-6 text-clamp">
       <?php foreach ($nav_links as $link): ?>
+
         <?php
-          // Normalize DB URL (ex: "about" → "/about")
-          $linkUrl = "/" . trim($link['url'], "/");
-
-          // Final clickable URL with base path
-          $finalUrl = $BASE_URL . $linkUrl;
-
-          // Check active
-          $isActive = ($currentRoute === $linkUrl);
+          /**
+           * URL handling:
+           * - Navigation URLs are INTERNAL routes
+           * - They are validated in JSON + DB layer
+           * - We normalize but do NOT escape URLs as text
+           */
+          $linkPath = '/' . trim($link['url'] ?? '', '/');
+          $finalUrl = $BASE_URL . $linkPath;
+          $isActive = ($currentRoute === $linkPath);
         ?>
-        <a href="<?= $finalUrl ?>"
-            class="<?= $isActive ? 'text-accent underline underline-offset-8 decoration-2 font-semibold' : 'hover:text-accent' ?>">
-          <?= htmlspecialchars($link['label']) ?>
+
+        <a href="<?= safe($finalUrl) ?>"
+           class="<?= $isActive
+             ? 'text-accent underline underline-offset-8 decoration-2 font-semibold'
+             : 'hover:text-accent'
+           ?>">
+          <?= field($link, 'label') ?>
         </a>
+
       <?php endforeach; ?>
     </nav>
 
     <?php
-      // Normalize CTA link
-      $link = $header['button_link'];
-      $link = preg_replace('/\.php$/', '', $link);     // remove contact.php
-      $link = '/' . trim($link, '/');                  // ensure /contact
-      $btnUrl = $BASE_URL . $link;                     // add base path
+      /**
+       * CTA Button URL
+       * - Must be an INTERNAL route
+       * - Already validated by JsonValidator
+       */
+      $ctaPath = '/' . trim($header['button_link'] ?? '', '/');
+      $ctaUrl  = $BASE_URL . $ctaPath;
     ?>
+
     <!-- CTA BUTTON -->
-    <a href="<?= $btnUrl ?>"
-        class="hidden sm:inline-block bg-gradient-to-r from-[#d32f2f] via-[#ff5a5a] to-[#ff8c5a] text-darkbg font-bold px-5 py-2 rounded-md btn-glow">
-      <?= htmlspecialchars($header['button_text']) ?>
+    <a href="<?= safe($ctaUrl) ?>"
+       class="hidden sm:inline-block bg-gradient-to-r from-[#d32f2f] via-[#ff5a5a] to-[#ff8c5a]
+              text-darkbg font-bold px-5 py-2 rounded-md btn-glow">
+      <?= field($header, 'button_text', 'Contact') ?>
     </a>
 
     <!-- MOBILE MENU BUTTON -->
@@ -97,23 +125,23 @@ if ($currentRoute === "//" || $currentRoute === "/") {
       <i class="fa-solid fa-bars text-xl"></i>
     </button>
 
-    </div>
+  </div>
 
-    <!-- MOBILE DROPDOWN -->
-    <div id="mobileMenu" class="md:hidden hidden bg-[#111] border-t border-[#333] text-white">
-      <nav class="flex flex-col p-4 space-y-3 font-medium text-base">
-        <?php foreach ($nav_links as $link): ?>
-          <?php $mobileUrl = $BASE_URL . "/" . trim($link['url'], "/"); ?>
-          <a href="<?= $mobileUrl ?>" class="hover:text-accent">
-            <?= htmlspecialchars($link['label']) ?>
-          </a>
-          <?php endforeach; ?>
-      </nav>
-    </div>
+  <!-- MOBILE MENU -->
+  <div id="mobileMenu" class="md:hidden hidden bg-[#111] border-t border-[#333] text-white">
+    <nav class="flex flex-col p-4 space-y-3 font-medium text-base">
+      <?php foreach ($nav_links as $link): ?>
+        <?php $mobileUrl = $BASE_URL . '/' . trim($link['url'] ?? '', '/'); ?>
+        <a href="<?= safe($mobileUrl) ?>" class="hover:text-accent">
+          <?= field($link, 'label') ?>
+        </a>
+      <?php endforeach; ?>
+    </nav>
+  </div>
 
 </header>
 
 <!-- HEADER JS -->
 <?php foreach ($header_js as $js): ?>
-  <script src="<?= htmlspecialchars($js) ?>"></script>
+  <script src="<?= safe($js) ?>"></script>
 <?php endforeach; ?>
