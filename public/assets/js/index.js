@@ -17,3 +17,38 @@
         document.querySelector('.parallax-bg').style.backgroundPosition = `center ${y}px`;
       });
     }
+
+// ===== Lottie Safe Fallback (HARD FAIL SAFE) =====
+document.addEventListener('DOMContentLoaded', () => {
+  const lotties = document.querySelectorAll('lottie-player[data-fallback]');
+
+  lotties.forEach(original => {
+    const fallback = original.dataset.fallback;
+    let loaded = false;
+
+    original.addEventListener('load', () => {
+      loaded = true;
+    });
+
+    setTimeout(() => {
+      if (loaded) return;
+
+      console.warn('Lottie failed permanently. Recreating with fallback.');
+
+      // Clone attributes
+      const replacement = document.createElement('lottie-player');
+      [...original.attributes].forEach(attr => {
+        if (attr.name !== 'src') {
+          replacement.setAttribute(attr.name, attr.value);
+        }
+      });
+
+      replacement.setAttribute('src', fallback);
+
+      // Replace poisoned element
+      original.replaceWith(replacement);
+
+    }, 1000); // 1–1.5s is ideal
+  });
+});
+

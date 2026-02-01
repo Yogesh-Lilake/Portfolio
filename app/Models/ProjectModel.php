@@ -3,6 +3,9 @@ namespace app\Models;
 
 use PDO;
 use app\Services\CacheService;
+
+use app\JsonValidators\Pages\Home\HomeProjectsSectionJsonValidator;
+
 use app\Core\DB;
 use Throwable;
 
@@ -91,21 +94,42 @@ class ProjectModel {
             if ($this->defaultPath && file_exists($this->defaultPath)) {
                 $json = json_decode(file_get_contents($this->defaultPath), true);
 
-                if (!empty($json)) {
+                if (!is_array($json)) {
+                    goto HARD_FALLBACK;
+                }
+
+                $validator = new HomeProjectsSectionJsonValidator();
+
+                if ($validator->validate($json)) {
                     return [
                         "source" => "json",
-                        "data"   => $json
+                        "data"   => $this->normalizeFeatured($json)
                     ];
                 }
+
+                app_log($validator->getErrorCode(), 'warning');
             }
         }
 
         /** D. HARD FALLBACK */
+        HARD_FALLBACK:
         return [
             "source" => "fallback",
             "data"   => $this->defaultFeatured()
         ];
     }
+
+    private function normalizeFeatured(array $projects): array
+    {
+        foreach ($projects as &$p) {
+            $p['image_path'] ??= 'project-placeholder.png';
+            $p['project_link'] ??= '#';
+            $p['is_featured'] = (int) ($p['is_featured'] ?? 0);
+            $p['sort_order']  = (int) ($p['sort_order'] ?? 0);
+        }
+        return $projects;
+    }
+
 
     /**
     * Default fallback for FEATURED projects only

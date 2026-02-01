@@ -4,6 +4,9 @@ namespace app\Models;
 use PDO;
 use app\Services\CacheService;
 use app\Core\DB;
+
+use app\JsonValidators\Pages\Home\HomeAboutSectionJsonValidator;
+
 use Throwable;
 
 /**
@@ -102,22 +105,46 @@ class AboutModel {
         /** C. JSON DEFAULT (PRIMARY FALLBACK) */
         if ($row["source"] === "empty") {
             if ($this->defaultPath && file_exists($this->defaultPath)) {
-                $json = json_decode(file_get_contents($this->defaultPath), true);
+                
+                $raw = file_get_contents($this->defaultPath);
+                $json = json_decode($raw, true);
 
-                if (!empty($json)) {
+                if (!is_array($json)) {
+                    goto HARD_FALLBACK;
+                }
+
+                if (array_is_list($json)) {
+                    goto HARD_FALLBACK;
+                }
+
+                $validator = new HomeAboutSectionJsonValidator();
+
+                if ($validator->validate($json)) {
                     return [
                         "source" => "json",
-                        "data"   => $json
+                        "data"   => $this->normalizeGet($json)
                     ];
                 }
+
+                app_log($validator->getErrorCode(), 'warning');
             }
         }
 
         /** D. HARD FALLBACK */
+        HARD_FALLBACK:
         return [
             "source" => "fallback",
-            "data"   => $this->defaults()
-            ];
+            "data"   => $this->normalizeGet($this->defaults())
+        ];
+    }
+
+    private function normalizeGet(array $about): array
+    {
+        return [
+            'title'     => trim($about['title'] ?? 'About Me'),
+            'content'   => trim($about['content'] ?? ''),
+            'is_active' => 1
+        ];
     }
 
     /* ============================================================
@@ -282,7 +309,8 @@ class AboutModel {
     {
         return [
             "title"   => "About Me D",
-            "content" => "Hi, I'm Yogesh. I build optimized, scalable and user-friendly applications."
+            "content" => "Hi, I'm Yogesh. I build optimized, scalable and user-friendly applications.",
+            'is_active' => 1
         ];
     }
 

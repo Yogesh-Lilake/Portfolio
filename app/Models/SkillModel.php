@@ -4,6 +4,9 @@ namespace app\Models;
 use PDO;
 use app\Services\CacheService;
 use app\Core\DB;
+
+use app\JsonValidators\Pages\Home\HomeSkillsSectionJsonValidator;
+
 use Throwable;
 
 class SkillModel {
@@ -91,27 +94,53 @@ class SkillModel {
             return $row;
         }
 
-        /** C. JSON DEFAULT (PRIMARY FALLBACK) */
+        /** C. JSON DEFAULT */
         if ($row["source"] === "empty") {
             if ($this->defaultJson && file_exists($this->defaultJson)) {
+
                 $json = json_decode(file_get_contents($this->defaultJson), true);
 
-                if (!empty($json) && is_array($json)) {
+                if (!is_array($json)) {
+                    goto HARD_FALLBACK;
+                }
+
+                $validator = new HomeSkillsSectionJsonValidator();
+
+                if ($validator->validate($json)) {
                     return [
                         "source" => "json",
-                        "data"   => $json
+                        "data"   => $this->normalize($json)
                     ];
                 }
+
+                app_log($validator->getErrorCode(), 'warning');
             }
         }
 
         /** ----------------------------------------------------
          * D. HARD-CODED DEFAULTS
          * ----------------------------------------------------*/
+        HARD_FALLBACK:
         return [
             "source" => "fallback",
             "data"   => $this->defaults()
         ];
+    }
+
+    private function normalize(array $skills): array
+    {
+        $clean = [];
+
+        foreach ($skills as $skill) {
+            $clean[] = [
+                'skill_name'  => trim($skill['skill_name']),
+                'icon_class'  => trim($skill['icon_class']),
+                'color_class' => trim($skill['color_class']),
+                'is_active'   => 1
+            ];
+        }
+
+        return $clean;
     }
 
     /**

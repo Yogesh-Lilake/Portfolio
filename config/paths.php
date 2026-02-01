@@ -247,6 +247,13 @@ define('LOTTIE_PLAYER', 'https://unpkg.com/@lottiefiles/lottie-player@latest/dis
 define('GSAP_CDN', 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js');
 define('GSAP_SCROLLTRIGGER_CDN', 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js');
 
+
+// =================================
+// EXTERNAL DEFAULT URLs
+// =================================
+define('DEFAULT_LOTTIE', 'https://assets10.lottiefiles.com/packages/lf20_kyu7xb1v.json');
+
+
 // ====================================================
 // PAGE ROUTES
 // ====================================================

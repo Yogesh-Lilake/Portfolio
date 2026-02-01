@@ -3,6 +3,9 @@ namespace app\Models;
 
 use app\Services\CacheService;
 use app\Core\DB;
+
+use app\JsonValidators\Pages\Home\HomeSectionJsonValidator;
+
 use Throwable;
 
 class HomeModel
@@ -10,6 +13,8 @@ class HomeModel
     private string $cacheKey = "home";
     private ?string $defaultPath = null;  // This path may legitimately not exist
     // private int $defaultTTL = 3600; // 1 hour (tunable)
+
+    private string $default_lottie = DEFAULT_LOTTIE;
 
     public function __construct()
     {
@@ -95,22 +100,64 @@ class HomeModel
         /** C. Try default JSON */
         if ($row["source"] === "empty") {
             if ($this->defaultPath && file_exists($this->defaultPath)) {
-                $json = json_decode(file_get_contents($this->defaultPath), true);
-                if (!empty($json)) {
+
+                $raw = file_get_contents($this->defaultPath);
+                $json = json_decode($raw, true);
+
+                /**
+                 * DC-01: Invalid JSON syntax
+                 *  - json_decode() failed
+                 *  - Silent igonre 
+                 */
+                if (!is_array($json)) {
+                    goto HARD_FALLBACK;
+                }
+
+                /**
+                 * DC-02: Root structure invalid (must be object)
+                 *  - Silent ignore
+                 */
+                if(array_is_list($json)) {
+                    goto HARD_FALLBACK;
+                }
+
+                /**
+                * Schema + semantic validation (DC-09+)
+                */
+                $validator = new HomeSectionJsonValidator();
+
+                if ($validator->validate($json)) {
                     return [
                         "source" => "json",
-                        "data"   => $json
+                        "data"   => $this->normalize($json)
                     ];
                 }
+                // DC-09 / DC-10 / DC-11 → log
+                app_log($validator->getErrorCode(), 'warning');
             }
         }
 
         /** D. Hard-coded fallback */
+        HARD_FALLBACK:
         return [
             "source" => "fallback",
-            "data"   => $this->defaultHome()
+            "data"   => $this->normalize($this->defaultHome())
         ];
     }
+
+    private function normalize(array $home): array
+    {
+        // Ensure default lottie always exists
+        if (
+            empty($home['background_lottie']) ||
+            !preg_match('#^https?://#i', $home['background_lottie'])
+        ) {
+            $home['background_lottie'] = DEFAULT_LOTTIE;
+        }
+
+        return $home;
+    }
+
 
 
     /* ============================================================

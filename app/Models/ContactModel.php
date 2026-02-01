@@ -4,6 +4,9 @@ namespace app\Models;
 use PDO;
 use app\Services\CacheService;
 use app\Core\DB;
+
+use app\JsonValidators\Pages\Home\HomeContactSectionJsonValidator;
+
 use Throwable;
 
 class ContactModel {
@@ -90,19 +93,43 @@ class ContactModel {
             if ($this->defaultHomeJson && file_exists($this->defaultHomeJson)) {
                 $json = json_decode(file_get_contents($this->defaultHomeJson), true);
 
-                if (!empty($json)) {
+                if (!is_array($json)) {
+                    goto HARD_FALLBACK;
+                }
+
+                if (array_is_list($json)) {
+                    goto HARD_FALLBACK;
+                }
+
+                $validator = new HomeContactSectionJsonValidator();
+
+                if ($validator->validate($json)) {
                     return [
                         "source" => "json",
-                        "data"   => $json
+                        "data"   => $this->normalizeGet($json)
                     ];
                 }
+
+                app_log($validator->getErrorCode(), "error");
             }
         }
 
         /** D. HARD FALLBACK */
+        HARD_FALLBACK:
         return [
             "source" => "fallback",
             "data"   => $this->defaults()
+        ];
+    }
+
+    private function normalizeGet(array $data): array
+    {
+        return [
+            'title'       => trim($data['title']),
+            'subtitle'    => trim($data['subtitle']),
+            'button_text' => trim($data['button_text']),
+            'button_link' => trim($data['button_link']),
+            'is_active'   => 1
         ];
     }
 

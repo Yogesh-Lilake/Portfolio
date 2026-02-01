@@ -33,8 +33,10 @@ require_once LAYOUT_HEAD_FILE;
 <section class="text-center py-24 sm:py-28 relative overflow-hidden parallax-bg"
     style="background-image:url('<?= field($home, 'background_image') ?>')">
 
-    <lottie-player 
+    <lottie-player
+        id="heroLottie"
         src="<?= field($home, 'background_lottie') ?>"
+        data-fallback="<?= DEFAULT_LOTTIE ?>"
         background="transparent"
         speed="1" loop autoplay
         style="position:absolute; inset:0; opacity:0.15; z-index:-1;">
