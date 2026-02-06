@@ -4,6 +4,8 @@ namespace app\Models;
 use app\Services\CacheService;
 use app\Core\DB;
 
+use app\Services\AssetHealthService;
+
 use app\JsonValidators\Pages\Home\HomeSectionJsonValidator;
 
 use Throwable;
@@ -147,13 +149,12 @@ class HomeModel
 
     private function normalize(array $home): array
     {
-        // Ensure default lottie always exists
-        if (
-            empty($home['background_lottie']) ||
-            !preg_match('#^https?://#i', $home['background_lottie'])
-        ) {
-            $home['background_lottie'] = DEFAULT_LOTTIE;
-        }
+        $home['background_lottie'] = AssetHealthService::resolveLottieUrl(
+            $home['background_lottie'] ?? null,
+            DEFAULT_LOTTIE,
+            'home_page',
+            'home_section'
+        );
 
         return $home;
     }
