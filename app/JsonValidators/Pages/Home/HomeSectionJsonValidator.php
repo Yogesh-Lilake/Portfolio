@@ -31,7 +31,7 @@ final class HomeSectionJsonValidator implements JsonValidatorInterface
         'cta_primary_link' => ['type' => 'string', 'required' => true],
 
         'cta_secondary_text' => ['type' => 'string', 'required' => false],
-        'cta_secondary_link' => ['type' => 'string', 'required' => false],
+        'cta_secondary_link' => ['type' => 'string', 'required' => false, 'allowed' => ['DOWNLOAD_CV']],
         'cv_file_path' => ['type' => 'string', 'required' => false],
 
         'seo_title' => ['type' => 'string', 'required' => true],
@@ -96,6 +96,22 @@ final class HomeSectionJsonValidator implements JsonValidatorInterface
             return false;
         }
 
+        /* ============================================================
+         * DC-H06 — CTA SECONDARY ACTION VALIDATION
+         * ============================================================ */
+        if (
+            isset($data['cta_secondary_link']) &&
+            isset($this->schema['cta_secondary_link']['allowed']) &&
+            !in_array(
+                $data['cta_secondary_link'],
+                $this->schema['cta_secondary_link']['allowed'],
+                true
+            )
+        ) {
+            $this->errorCode = 'DC-H06: invalid cta_secondary_link action';
+            return false;
+        }
+
         // LOTTIE: soft check only (no failure, no log)
         if (!$this->isValidUrl($data['background_lottie'])) {
             // silently accepted — normalized later
@@ -104,20 +120,20 @@ final class HomeSectionJsonValidator implements JsonValidatorInterface
         foreach (['background_image', 'profile_image', 'cv_file_path'] as $pathKey) {
             if (isset($data[$pathKey]) && !$this->isSafeAssetPath($data[$pathKey])) {
                 $this->errorCode =
-                    "DC-H05: unsafe path '{$pathKey}'";
+                    "DC-H07: unsafe path '{$pathKey}'";
                 return false;
             }
         }
 
         foreach ($data as $value) {
             if (is_string($value) && $this->containsScript($value)) {
-                $this->errorCode = 'DC-H05: XSS detected';
+                $this->errorCode = 'DC-H08: XSS detected';
                 return false;
             }
         }
 
         if (!in_array($data['is_active'], [0, 1], true)) {
-            $this->errorCode = 'DC-H05: invalid is_active';
+            $this->errorCode = 'DC-H09: invalid is_active';
             return false;
         }
 

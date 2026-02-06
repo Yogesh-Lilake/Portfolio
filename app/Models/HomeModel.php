@@ -5,6 +5,7 @@ use app\Services\CacheService;
 use app\Core\DB;
 
 use app\Services\AssetHealthService;
+use app\Services\CVActionResolver;
 
 use app\JsonValidators\Pages\Home\HomeSectionJsonValidator;
 
@@ -50,7 +51,7 @@ class HomeModel
                 ];
             }
 
-            $stmt = $pdo->query("SELECT * FROM home_section WHERE is_active=1 LIMIT 1");
+            $stmt = $pdo->query("SELECT * FROM home_section WHERE is_active=0 LIMIT 1");
 
             // $row = $stmt->fetch(PDO::FETCH_ASSOC); // It tries to resolve from app\Models\PDO class and fails. (Reolve by without PDO:: prefix)
             $row = $stmt->fetch() ?: [];
@@ -155,6 +156,12 @@ class HomeModel
             'home_page',
             'home_section'
         );
+
+        // Resolve CTA secondary action → route
+        $secondaryAction = $home['cta_secondary_link'] ?? null;
+        $home['cta_secondary_link'] = $secondaryAction
+            ? CVActionResolver::resolve(trim($secondaryAction))
+            : null;
 
         return $home;
     }

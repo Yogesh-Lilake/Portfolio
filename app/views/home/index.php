@@ -60,8 +60,8 @@ require_once LAYOUT_HEAD_FILE;
             <?= field($home, 'cta_primary_text') ?? 'Download CV'?>
         </a>
 
-        <?php if (!$safeMode): ?>
-            <button onclick="ajaxDownload('<?= url($home['cta_secondary_link'] ?? '') ?>', 'Yogesh_Lilake_Resume.pdf')"
+        <?php if (!empty($home['cta_secondary_link']) && !$safeMode): ?>
+            <button onclick="ajaxDownload('<?= url($home['cta_secondary_link']) ?>', 'Yogesh_Lilake_Resume.pdf')"
                 class="btn border border-accent text-accent px-6 py-3 rounded-full font-semibold hover:bg-accent hover:text-darkbg transition">
                 <?= field($home, 'cta_secondary_text') ?>
             </button>
